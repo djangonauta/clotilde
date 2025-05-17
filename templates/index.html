@@ -1,0 +1,26 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>{% load static %}
+<html>
+<head>
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/script.js' %}"></script>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+    <p>Bem-vindo ao Django Single File!</p>
+    <p>Esta é uma aplicação Django rodando em um único arquivo!</p>
+    
+    <div class="debug-info">
+        <p>Você está visualizando o arquivo index.html no diretório templates.</p>
+        <p>Os arquivos estáticos são servidos a partir do diretório static.</p>
+        <p><a href="/debug/">Ver informações de depuração</a></p>
+        <p><a href="/tarefa/">Tarefa</a></p>
+    </div>
+    
+    <div class="static-test">
+        <h2>Teste de Arquivos Estáticos</h2>
+        <img src="/static/img/test.png" alt="Imagem de teste">
+    </div>
+</body>
+</html>
