@@ -1,11 +1,4 @@
-"""
-Arquivo de especificação PyInstaller para a aplicação Clotilde
-Uma aplicação Django rodando dentro do PyWebview
-"""
 import os
-import sys
-
-from PyInstaller.utils.hooks import collect_all
 
 block_cipher = None
 base_dir = os.path.abspath(os.getcwd())
@@ -13,17 +6,22 @@ base_dir = os.path.abspath(os.getcwd())
 static_dir = os.path.join(base_dir, 'static')
 templates_dir = os.path.join(base_dir, 'templates')
 
-automacoes_imports, automacoes_datas, automacoes_binaries = collect_all('automacoes')
-
 added_files = [
-    ('static', 'static'),
+    ('_internal/static', 'static'),
     ('templates', 'templates'),
     ('db.sqlite3', '.'),
 ]
 
 # Pacotes necessários que o PyInstaller pode não detectar automaticamente
 hidden_imports = [
-    'django',
+    'automacoes',
+    'automacoes.views',
+    'automacoes.urls',
+    'automacoes.models',
+    'automacoes.apps',
+    'forms',
+    'utils',
+    'views',
     'django.template.defaulttags',
     'django.template.defaultfilters',
     'django.template.loader_tags',
@@ -42,14 +40,15 @@ hidden_imports = [
     'django.db.models.lookups',
     'django.db.models.aggregates',
     'webview',
-    'webview.platforms.winforms',  # Para Windows
-    'webview.platforms.cocoa',     # Para macOS
-    'webview.platforms.gtk',       # Para Linux
+    'webview.platforms.winforms',
+    'webview.platforms.gtk',
+    'widget_tweaks',
+    'widget_tweaks.templatetags',
+    'widget_tweaks.templatetags.widget_tweaks',
     'jinja2',
     'asgiref',
     'sqlparse',
-    'pytz',
-] + automacoes_imports
+]
 
 a = Analysis(
     ['main.py'],
@@ -105,16 +104,3 @@ coll = COLLECT(
     upx_exclude=[],
     name='Clotilde',
 )
-
-# Para macOS, adicione esta configuração (opcional)
-if sys.platform == 'darwin':
-    app = BUNDLE(
-        coll,
-        name='Clotilde.app',
-        # icon=os.path.join(base_dir, 'icon.icns'),
-        bundle_identifier='com.seudominio.clotilde',
-        info_plist={
-            'CFBundleShortVersionString': '1.0.0',
-            'NSHighResolutionCapable': 'True',
-        },
-    )

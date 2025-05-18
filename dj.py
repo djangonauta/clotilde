@@ -9,6 +9,7 @@ from django.core.wsgi import get_wsgi_application
 
 import views
 
+DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 if getattr(sys, 'frozen', False):
     BASE_DIR = sys._MEIPASS
@@ -16,10 +17,9 @@ if getattr(sys, 'frozen', False):
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 DB_PATH = os.path.join(BASE_DIR, 'db.sqlite3')
-STATIC_ROOT = STATIC_DIR if getattr(sys, 'frozen', False) else None
 
 settings.configure(
-    DEBUG=True,
+    DEBUG=DEBUG,
     BASE_DIR=BASE_DIR,
     SECRET_KEY='your-secret-key-here',
     ROOT_URLCONF=__name__,
@@ -61,9 +61,8 @@ settings.configure(
             'NAME': DB_PATH,
         }
     },
-    STATIC_URL='static/',
+    STATIC_URL='_internal/static/',
     STATICFILES_DIRS=[STATIC_DIR],
-    STATIC_ROOT=STATIC_ROOT,
     ALLOWED_HOSTS=['*'],
 )
 
@@ -76,7 +75,6 @@ urlpatterns = [
     urls.path('automacoes/', urls.include('automacoes.urls')),
 ]
 urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 application = get_wsgi_application()
 
