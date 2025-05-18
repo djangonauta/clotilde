@@ -1,26 +1,55 @@
-<!-- templates/index.html -->
-<!DOCTYPE html>{% load static %}
-<html>
-<head>
-    <title>{{ title }}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <script src="{% static 'js/script.js' %}"></script>
-</head>
-<body>
-    <h1>{{ title }}</h1>
-    <p>Bem-vindo ao Django Single File!</p>
-    <p>Esta é uma aplicação Django rodando em um único arquivo!</p>
-    
-    <div class="debug-info">
-        <p>Você está visualizando o arquivo index.html no diretório templates.</p>
-        <p>Os arquivos estáticos são servidos a partir do diretório static.</p>
-        <p><a href="/debug/">Ver informações de depuração</a></p>
-        <p><a href="/tarefa/">Tarefa</a></p>
+{% extends 'base.html' %}
+{% block conteudo %}
+<div class="row justify-content-center">
+  <div class="col-lg-12">
+    <!-- Abas de navegação -->
+    <ul class="nav nav-tabs" id="automationTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="seeu-tab" data-bs-toggle="tab" data-bs-target="#seeu" type="button"
+          role="tab" aria-controls="seeu" aria-selected="true">SEEU</button>
+      </li>
+    </ul>
+
+    <!-- Conteúdo das abas -->
+    <div class="tab-content" id="automationTabsContent">
+      <!-- Conteúdo da aba SEEU -->
+      <div class="tab-pane fade show active" id="seeu" role="tabpanel" aria-labelledby="seeu-tab">
+        <div class="row justify-content-center my-4">
+          <div class="col-12 text-center">
+            <h3 class="mb-4 text-secondary">Selecione uma automação</h3>
+            <p class="text-muted mb-5">Clique em um dos botões abaixo para iniciar o processo de automação desejado.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center">
+              <div class="mb-4">
+                <button id="automacao-teste" data-url="{% url 'automacoes:automacao_teste' %}" class="automation-button btn-primary-circle pulse-primary"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Processar Documentos">
+                    <i class="fa-solid fa-file-lines"></i>
+                </button>
+                <div id="mensagem" class="alert alert-primary visually-hidden" role="alert"></div>
+              </div>
+
+              <!-- Botão de automação 2 -->
+              <div class="mb-4">
+                <button class="automation-button btn-success-circle pulse-success" data-bs-toggle="tooltip"
+                  data-bs-placement="top" title="Analisar Dados" onclick="alert('Frontend não bloqueado')">
+                  <i class="fa-solid fa-chart-column"></i>
+                </button>
+              </div>
+
+              <!-- Botão de automação 3 -->
+              <div class="mb-4">
+                <button class="automation-button btn-info-circle pulse-info" data-bs-toggle="tooltip"
+                  data-bs-placement="top" title="Gerar Relatórios" onclick="alert('Frontend não bloqueado')">
+                  <i class="fa-solid fa-file-pdf"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <div class="static-test">
-        <h2>Teste de Arquivos Estáticos</h2>
-        <img src="/static/img/test.png" alt="Imagem de teste">
-    </div>
-</body>
-</html>
+  </div>
+</div>
+{% endblock conteudo %}

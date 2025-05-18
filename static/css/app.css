@@ -1,0 +1,168 @@
+body {
+    padding-top: 20px;
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.app-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #446e9b;
+}
+
+.tab-content {
+    padding: 2rem 0;
+}
+
+.automation-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 15px;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.automation-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.automation-button i {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+}
+
+.automation-button-text {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Versão Spacelab dos botões */
+.btn-primary-circle {
+    background-color: #446e9b;
+    border-color: #446e9b;
+    color: white;
+}
+
+.btn-primary-circle:hover, .btn-primary-circle:focus {
+    background-color: #385a7f;
+    border-color: #385a7f;
+    color: white;
+}
+
+.btn-success-circle {
+    background-color: #3cb521;
+    border-color: #3cb521;
+    color: white;
+}
+
+.btn-success-circle:hover, .btn-success-circle:focus {
+    background-color: #2f9119;
+    border-color: #2f9119;
+    color: white;
+}
+
+.btn-info-circle {
+    background-color: #3399f3;
+    border-color: #3399f3;
+    color: white;
+}
+
+.btn-info-circle:hover, .btn-info-circle:focus {
+    background-color: #2a8ae2;
+    border-color: #2a8ae2;
+    color: white;
+}
+
+/* Pulse effect para os botões */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(68, 110, 155, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(68, 110, 155, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(68, 110, 155, 0);
+    }
+}
+
+.pulse-primary {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse-success {
+    0% {
+        box-shadow: 0 0 0 0 rgba(60, 181, 33, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(60, 181, 33, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(60, 181, 33, 0);
+    }
+}
+
+.pulse-success {
+    animation: pulse-success 2s infinite;
+}
+
+@keyframes pulse-info {
+    0% {
+        box-shadow: 0 0 0 0 rgba(51, 153, 243, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(51, 153, 243, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(51, 153, 243, 0);
+    }
+}
+
+.pulse-info {
+    animation: pulse-info 2s infinite;
+}
+
+.spinner {
+    animation: spin 2s linear infinite;
+    display: none; /* Inicialmente oculto */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: white;
+}
+
+.automation-button.loading .spinner {
+    display: block;
+}
+
+.automation-button.loading .fa-primary-icon,
+.automation-button.loading .fa-success-icon,
+.automation-button.loading .fa-info-icon,
+.automation-button.loading .automation-button-text {
+    visibility: hidden;
+}
+
+/* Status da automação */
+#automationStatus {
+    transition: all 0.3s ease;
+}

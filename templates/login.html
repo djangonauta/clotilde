@@ -1,0 +1,44 @@
+{% extends 'base.html' %}{% load widget_tweaks static %}
+{% block title %}Login{% endblock %}
+{% block body_class %}bg-light{% endblock %}
+
+{% block body %}
+<div class="container">
+  <div class="row vh-100 align-items-center justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-body">
+          <h4 class="card-title text-center mb-4">
+            <i class="fa-solid fa-building"></i> Clotilde
+          </h4>
+
+          <form action="" method="post">{% csrf_token %}
+            <div class="mb-3">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">
+                  <i class="fa-solid fa-user"></i>
+                </span>
+                {% render_field form.nome class='form-control form-control-sm' primeiro-campo='' placeholder='Digite seu nome' required="" %}
+              </div>
+              <div class="text-danger mt-1">{{ form.nome.errors.0 }}</div>
+            </div>
+            <div class="mb-3">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">
+                  <i class="fa-solid fa-user"></i>
+                </span>
+                {% render_field form.matricula class='form-control form-control-sm' placeholder='Digite sua Matricula' required="" %}
+              </div>
+              <div class="text-danger mt-1">{{ form.matricula.errors.0 }}</div>
+            </div>
+
+            <button data-spinner type="submit" class="btn btn-primary btn-sm w-100">
+              <i class="fa-solid fa-right-to-bracket"></i> Entrar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,24 +1,26 @@
+import os
 import sys
-from pathlib import Path
 
 import django
+from django import urls
 from django.conf import settings
 from django.conf.urls import static
 from django.core.wsgi import get_wsgi_application
-from django.urls import path
 
 import views
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 if getattr(sys, 'frozen', False):
-    BASE_DIR = Path(sys.executable).parent
+    BASE_DIR = sys._MEIPASS
 
-TEMPLATE_DIR = BASE_DIR / 'templates'
-STATIC_DIR = BASE_DIR / 'static'
-DB_PATH = BASE_DIR / 'db.sqlite3'
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+DB_PATH = os.path.join(BASE_DIR, 'db.sqlite3')
+STATIC_ROOT = STATIC_DIR if getattr(sys, 'frozen', False) else None
 
 settings.configure(
     DEBUG=True,
+    BASE_DIR=BASE_DIR,
     SECRET_KEY='your-secret-key-here',
     ROOT_URLCONF=__name__,
     MIDDLEWARE=[
@@ -31,11 +33,13 @@ settings.configure(
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ],
     INSTALLED_APPS=[
+        'automacoes',
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
         'django.contrib.messages',
         'django.contrib.staticfiles',
+        'widget_tweaks',
     ],
     TEMPLATES=[{
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -57,18 +61,22 @@ settings.configure(
             'NAME': DB_PATH,
         }
     },
-    STATIC_URL='/static/',
+    STATIC_URL='static/',
     STATICFILES_DIRS=[STATIC_DIR],
+    STATIC_ROOT=STATIC_ROOT,
     ALLOWED_HOSTS=['*'],
 )
 
 django.setup()
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('tarefa/', views.selenium, name='selenium'),
+    urls.path('', views.index, name='index'),
+    urls.path('login/', views.login, name='login'),
+    urls.path('logout/', views.logout, name='logout'),
+    urls.path('automacoes/', urls.include('automacoes.urls')),
 ]
 urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 application = get_wsgi_application()
 

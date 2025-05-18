@@ -42,7 +42,7 @@ if __name__ == '__main__':
     time.sleep(1)
 
     window = webview.create_window(
-        title='Minha Aplicação Web',
+        title='Clotilde',
         url='http://127.0.0.1:8000',
         js_api=Api(),
         width=1024,

@@ -14,9 +14,11 @@ package-mode = false
 [tool.poetry.dependencies]
 django = "^5.2.1"
 pywebview = "^5.4"
-pythonnet = "^3.0.5"
 selenium = "^4.32.0"
 webdriver-manager = "^4.0.2"
+pythonnet = "^3.0.5"
+pyinstaller = "^6.13.0"
+django-widget-tweaks = "^1.5.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -26,7 +28,6 @@ django-debug-toolbar = "^5.2.0"
 flake8 = "^7.2.0"
 ipython = "^9.2.0"
 isort = "^6.0.1"
-cx-freeze = "^8.3.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

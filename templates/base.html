@@ -1,0 +1,45 @@
+<!DOCTYPE html>{% load static %}
+<html lang="pt-BR">
+  <head>
+    {% block meta %}
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% endblock %}
+
+    <title>{% block title %}Bem vindo{% endblock %}</title>
+
+    <link rel="shortcut icon" href="{% static 'images/python-logo.png' %}" />
+
+    {% block styles %}
+    <link rel="stylesheet" href="{% static 'libs/bootstrap-5.3.3/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'libs/bootstrap-5.3.3/css/spacelab.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'libs/fontawesome-free-6.7.2-web/css/all.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+    {% endblock %}
+  </head>
+
+  <body class="{% block body_class %}{% endblock %}">
+    {% block body %}
+
+    {% include "includes/navbar.html" %}
+  
+    <div class="container mt-4">
+      <div class="row justify-content-center">
+        <div class="col-12">
+          {% include "includes/messages.html" %}
+          {% block conteudo %}{% endblock conteudo %}
+        </div>
+      </div>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script src="{% static 'libs/jquery-3.7.1/js/jquery.min.js' %}"></script>
+    <script src="{% static 'libs/bootstrap-5.3.3/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+    {% endblock %}
+
+    {% block extra_scripts %}{% endblock extra_scripts %}
+  </body>
+</html>
