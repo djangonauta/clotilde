@@ -5,6 +5,7 @@ import django
 from django import urls
 from django.conf import settings
 from django.conf.urls import static
+from django.core.management.utils import get_random_secret_key
 from django.core.wsgi import get_wsgi_application
 
 import views
@@ -15,13 +16,13 @@ if getattr(sys, 'frozen', False):
     BASE_DIR = sys._MEIPASS
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
-STATIC_DIR = os.path.join(BASE_DIR, 'static')
+STATIC_DIR = os.path.join(BASE_DIR, '_internal/static')
 DB_PATH = os.path.join(BASE_DIR, 'db.sqlite3')
 
 settings.configure(
     DEBUG=DEBUG,
     BASE_DIR=BASE_DIR,
-    SECRET_KEY='your-secret-key-here',
+    SECRET_KEY=get_random_secret_key(),
     ROOT_URLCONF=__name__,
     MIDDLEWARE=[
         'django.middleware.security.SecurityMiddleware',

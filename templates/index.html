@@ -22,28 +22,29 @@
 
             <div class="d-flex flex-wrap justify-content-center">
               <div class="mb-4">
-                <button id="automacao-teste" data-url="{% url 'automacoes:automacao_teste' %}" class="automation-button btn-primary-circle pulse-primary"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top" title="Processar Documentos">
+                <button automatizacao data-url="{% url 'automacoes:automacao_teste' %}" data-mensagem="#mensagem"
+                    class="automation-button btn-primary-circle pulse-primary">
                     <i class="fa-solid fa-file-lines"></i>
                 </button>
-                <div id="mensagem" class="alert alert-primary visually-hidden" role="alert"></div>
+                <div id="mensagem" class="alert visually-hidden" role="alert"></div>
               </div>
 
               <!-- Botão de automação 2 -->
               <div class="mb-4">
-                <button class="automation-button btn-success-circle pulse-success" data-bs-toggle="tooltip"
-                  data-bs-placement="top" title="Analisar Dados" onclick="alert('Frontend não bloqueado')">
+                <button automatizacao data-url="{% url 'automacoes:automacao_teste' %}" data-mensagem="#mensagem2"
+                    class="automation-button btn-primary-circle pulse-primary">
                   <i class="fa-solid fa-chart-column"></i>
                 </button>
+                <div id="mensagem2" class="alert visually-hidden" role="alert"></div>
               </div>
 
               <!-- Botão de automação 3 -->
               <div class="mb-4">
-                <button class="automation-button btn-info-circle pulse-info" data-bs-toggle="tooltip"
-                  data-bs-placement="top" title="Gerar Relatórios" onclick="alert('Frontend não bloqueado')">
+                <button automatizacao data-url="{% url 'automacoes:automacao_teste' %}" data-mensagem="#mensagem3"
+                    class="automation-button btn-primary-circle pulse-primary">
                   <i class="fa-solid fa-file-pdf"></i>
                 </button>
+                <div id="mensagem3" class="alert visually-hidden" role="alert"></div>
               </div>
             </div>
           </div>
