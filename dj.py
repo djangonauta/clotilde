@@ -14,6 +14,7 @@ DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 if getattr(sys, 'frozen', False):
     BASE_DIR = sys._MEIPASS
+    DEBUG = False
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, '_internal/static')
@@ -26,6 +27,7 @@ settings.configure(
     ROOT_URLCONF=__name__,
     MIDDLEWARE=[
         'django.middleware.security.SecurityMiddleware',
+        "whitenoise.middleware.WhiteNoiseMiddleware",
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
@@ -62,9 +64,11 @@ settings.configure(
             'NAME': DB_PATH,
         }
     },
-    STATIC_URL='_internal/static/',
+    STATIC_URL='/static/',
     STATICFILES_DIRS=[STATIC_DIR],
-    ALLOWED_HOSTS=['*'],
+    STATIC_ROOT='_internal/assets/',
+    ALLOWED_HOSTS=['localhost', '127.0.0.1'],
+    PROCESSOS={},
 )
 
 django.setup()
@@ -75,7 +79,8 @@ urlpatterns = [
     urls.path('logout/', views.logout, name='logout'),
     urls.path('automacoes/', urls.include('automacoes.urls')),
 ]
-urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if DEBUG:
+    urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 application = get_wsgi_application()
 

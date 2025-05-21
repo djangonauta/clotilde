@@ -3,11 +3,8 @@ import os
 block_cipher = None
 base_dir = os.path.abspath(os.getcwd())
 
-static_dir = os.path.join(base_dir, 'static')
-templates_dir = os.path.join(base_dir, 'templates')
-
 added_files = [
-    ('_internal/static', 'static'),
+    ('_internal/assets', 'assets'),
     ('templates', 'templates'),
     ('db.sqlite3', '.'),
 ]

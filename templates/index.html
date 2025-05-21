@@ -10,45 +10,23 @@
       </li>
     </ul>
 
-    <!-- Conteúdo das abas -->
     <div class="tab-content" id="automationTabsContent">
-      <!-- Conteúdo da aba SEEU -->
       <div class="tab-pane fade show active" id="seeu" role="tabpanel" aria-labelledby="seeu-tab">
-        <div class="row justify-content-center my-4">
-          <div class="col-12 text-center">
-            <h3 class="mb-4 text-secondary">Selecione uma automação</h3>
-            <p class="text-muted mb-5">Clique em um dos botões abaixo para iniciar o processo de automação desejado.
-            </p>
-
-            <div class="d-flex flex-wrap justify-content-center">
-              <div class="mb-4">
-                <button automatizacao data-url="{% url 'automacoes:automacao_teste' %}" data-mensagem="#mensagem"
-                    class="automation-button btn-primary-circle pulse-primary">
-                    <i class="fa-solid fa-file-lines"></i>
-                </button>
-                <div id="mensagem" class="alert visually-hidden" role="alert"></div>
+        <table class="table table-bordered table-hover" automacao>
+          <tr>
+            <td>Automação teste</td>
+            <td style="width: 60%">
+              <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0"
+                aria-valuemax="100">
+                <div class="progress-bar" style="width: 0%"></div>
               </div>
-
-              <!-- Botão de automação 2 -->
-              <div class="mb-4">
-                <button automatizacao data-url="{% url 'automacoes:automacao_teste' %}" data-mensagem="#mensagem2"
-                    class="automation-button btn-primary-circle pulse-primary">
-                  <i class="fa-solid fa-chart-column"></i>
-                </button>
-                <div id="mensagem2" class="alert visually-hidden" role="alert"></div>
-              </div>
-
-              <!-- Botão de automação 3 -->
-              <div class="mb-4">
-                <button automatizacao data-url="{% url 'automacoes:automacao_teste' %}" data-mensagem="#mensagem3"
-                    class="automation-button btn-primary-circle pulse-primary">
-                  <i class="fa-solid fa-file-pdf"></i>
-                </button>
-                <div id="mensagem3" class="alert visually-hidden" role="alert"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+            </td>
+            <td>
+              <button id="iniciar" class="btn btn-primary btn-sm">Iniciar</button>
+              <button id="cancelar" class="btn btn-danger btn-sm">Cancelar</button>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
   </div>

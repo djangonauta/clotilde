@@ -15,4 +15,5 @@ class Automacao(models.Model):
     fim = models.DateTimeField(null=True, blank=True)
     status = models.IntegerField(choices=Status, default=Status.INICIADA)
     stack_trace = models.TextField(blank=True)
+    porcentagem = models.IntegerField(default=0)
     enviada = models.BooleanField(default=False)
