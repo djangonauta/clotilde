@@ -4,6 +4,7 @@ import sys
 import time
 import traceback
 import uuid
+import logging
 
 from django import http, shortcuts
 from django.conf import settings
@@ -20,6 +21,9 @@ import utils
 import time
 
 from . import models
+
+logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO)
 
 
 def verificar(request, id_automacao):
@@ -183,6 +187,9 @@ def loginSeeu(id_automacao):
                 driver.find_element(By.ID, "username").send_keys('89858948204')
                 driver.find_element(By.ID, "password").send_keys('Ro5291204.,')
                 driver.find_element(By.ID, "kc-login").click()
+                
+                logging.info('Etapa de autenticacao finalizada')
     except Exception as e:
         print(f"Erro ao acessar elementos na nova aba: {e}")
+        
     
