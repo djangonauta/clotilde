@@ -12,8 +12,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
 import utils
+import time
 
 from . import models
 
@@ -60,7 +64,7 @@ def tarefa(id_automacao):
     try:
         options = Options()
         driver = webdriver.Chrome(
-            service=Service(os.path.expanduser('~/chromedriver.exe')),
+            service=Service(os.path.expanduser('~/chromedriver')),
             options=options,
         )
         driver.implicitly_wait(3)
@@ -128,3 +132,57 @@ def tarefa(id_automacao):
         automacao.stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
         automacao.save()
         raise e
+    
+def configurar_driver():
+    options = Options()
+    # options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-plugins-discovery")
+    
+    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    
+    
+def loginSeeu(id_automacao):
+    driver = configurar_driver()
+    driver.get('https://seeuintegra.pje.jus.br/seeu/')
+    
+    try:
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'mainFrame'))
+        )
+        
+        driver.switch_to.frame(iframe)
+        
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a#btn-login-corporativo')))
+        # driver.find_element(By.ID, "btn-login-senha-toogle").click()
+        # driver.find_element(By.ID, "login").send_keys('rodrigo.resque')
+        # driver.find_element(By.ID, "senha").send_keys('123456')
+        # driver.find_element(By.ID, 'login-form').find_element(By.ID, 'btEntrar').click()
+
+        janela_original = driver.current_window_handle
+        driver.find_element(By.ID, "btn-login-corporativo").click()
+        
+        corporaivo = WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
+        if corporaivo:
+            todas_janelas = driver.window_handles
+            novas_abas = [ janela for janela in todas_janelas if janela != janela_original]
+            
+            if novas_abas:
+                nova_aba = novas_abas[0]
+                
+                if not isinstance(nova_aba, str):
+                    nova_aba = str(nova_aba)
+                
+                time.sleep(0.5)
+                
+                driver.switch_to.window(str(nova_aba))
+                
+                driver.find_element(By.ID, "username").send_keys('89858948204')
+                driver.find_element(By.ID, "password").send_keys('Ro5291204.,')
+                driver.find_element(By.ID, "kc-login").click()
+    except Exception as e:
+        print(f"Erro ao acessar elementos na nova aba: {e}")
+    
