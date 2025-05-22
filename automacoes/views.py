@@ -60,7 +60,7 @@ def tarefa(id_automacao):
     try:
         options = Options()
         driver = webdriver.Chrome(
-            service=Service(os.path.expanduser('~/chromedriver.exe')),
+            service=Service(os.path.expanduser('~/chromedriver')),
             options=options,
         )
         driver.implicitly_wait(3)
