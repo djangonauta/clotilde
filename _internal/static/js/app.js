@@ -3,8 +3,8 @@ function configurarAutomacoes() {
     var id_processo;
     var poolling;
 
-    const botaoIniciar = element.querySelector('#iniciar');
-    const botaoCancelar = element.querySelector('#cancelar');
+    const botaoIniciar = element.querySelector('.iniciar');
+    const botaoCancelar = element.querySelector('.cancelar');
 
     function iniciarAtivo() {
       botaoIniciar.disabled = false;

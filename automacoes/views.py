@@ -1,4 +1,5 @@
 import multiprocessing
+import os.path
 import sys
 import time
 import traceback
@@ -11,7 +12,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager
 
 import utils
 
@@ -28,7 +28,6 @@ def verificar(request, id_automacao):
 
 
 def cancelar(request, id_processo):
-    print(id_processo)
     settings.PROCESSOS[id_processo].terminate()
     return http.JsonResponse({'mensagem': 'Processo sinalizado para finalização'})
 
@@ -61,7 +60,7 @@ def tarefa(id_automacao):
     try:
         options = Options()
         driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
+            service=Service(os.path.expanduser('~/chromedriver.exe')),
             options=options,
         )
         driver.implicitly_wait(3)
