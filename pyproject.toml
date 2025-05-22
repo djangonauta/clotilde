@@ -20,6 +20,8 @@ pywebview = "^5.4"
 selenium = "^4.32.0"
 webdriver-manager = "^4.0.2"
 whitenoise = "^6.9.0"
+pyqtwebengine = "^5.15.7"
+qtpy = "^2.4.3"
 
 [tool.poetry.group.dev.dependencies]
 autopep8 = "^2.3.2"

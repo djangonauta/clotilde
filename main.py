@@ -52,4 +52,4 @@ if __name__ == '__main__':
         confirm_close=True,
         background_color='#FFFFFF'
     )
-    webview.start()
+    webview.start(gui='qt')
