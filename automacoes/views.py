@@ -1,5 +1,7 @@
 import multiprocessing
+import os
 import os.path
+import signal
 import sys
 import time
 import traceback
@@ -30,6 +32,18 @@ def verificar(request, id_automacao):
 def cancelar(request, id_processo):
     settings.PROCESSOS[id_processo].terminate()
     return http.JsonResponse({'mensagem': 'Processo sinalizado para finalização'})
+
+
+def pausar(request, id_processo):
+    pid = settings.PROCESSOS[id_processo].pid
+    os.kill(pid, signal.SIGSTOP)
+    return http.JsonResponse({'mensagem': 'Processo pausado com sucesso'})
+
+
+def continuar(request, id_processo):
+    pid = settings.PROCESSOS[id_processo].pid
+    os.kill(pid, signal.SIGCONT)
+    return http.JsonResponse({'mensagem': 'Processo continuado com sucesso'})
 
 
 def iniciar(request):

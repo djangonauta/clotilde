@@ -4,6 +4,8 @@ function configurarAutomacoes() {
     var poolling;
 
     const botaoIniciar = element.querySelector('.iniciar');
+    const botaoPausar = element.querySelector('.pausar');
+    const botaoContinuar = element.querySelector('.continuar');
     const botaoCancelar = element.querySelector('.cancelar');
 
     function iniciarAtivo() {
@@ -48,7 +50,27 @@ function configurarAutomacoes() {
           clearInterval(poolling);
         }
       }
-    })
+    });
+
+    botaoPausar.addEventListener('click', async function () {
+      if (!confirm('Deseja pausar essa automação?')) {
+        return
+      }
+      var url = '/automacoes/pausar/' + id_processo + '/';
+      const response = await fetch(url, {});
+      const data = await response.json()
+      console.log(data);
+    });
+
+    botaoContinuar.addEventListener('click', async function () {
+      if (!confirm('Deseja continuar essa automação?')) {
+        return
+      }
+      var url = '/automacoes/continuar/' + id_processo + '/';
+      const response = await fetch(url, {});
+      const data = await response.json()
+      console.log(data);
+    });
 
     botaoCancelar.addEventListener('click', async function() {
       if (!confirm('Deseja cancelar essa automação?')) {
