@@ -26,13 +26,13 @@ logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
 
-def verificar(request, id_automacao):
-    automacao = shortcuts.get_object_or_404(models.Automacao, pk=id_automacao)
-    return http.JsonResponse({
-        'status': automacao.status,
-        'id_automacao': id_automacao,
-        'porcentagem': automacao.porcentagem,
-    })
+# def verificar(request, id_automacao):
+#     automacao = shortcuts.get_object_or_404(models.Automacao, pk=id_automacao)
+#     return http.JsonResponse({
+#         'status': automacao.status,
+#         'id_automacao': id_automacao,
+#         'porcentagem': automacao.porcentagem,
+#     })
 
 
 def cancelar(request, id_processo):
@@ -57,7 +57,7 @@ def iniciar(request):
 
 
 def iniciar_processo(id_automacao):
-    p = multiprocessing.Process(target=tarefa, args=(id_automacao,))
+    p = multiprocessing.Process(target=loginSeeu, args=(id_automacao,))
     p.daemon = True
     p.start()
     return p
@@ -146,7 +146,10 @@ def configurar_driver():
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-plugins-discovery")
     
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    return webdriver.Chrome(
+            service=Service(os.path.expanduser('~/chromedriver')),
+            options=options,
+        )
     
     
 def loginSeeu(id_automacao):
@@ -188,20 +191,55 @@ def loginSeeu(id_automacao):
                 driver.find_element(By.ID, "password").send_keys('Ro5291204.,')
                 driver.find_element(By.ID, "kc-login").click()
                 
-                logging.info('Etapa de autenticacao finalizada')
+                time.sleep(0.5)
                 
-                if driver_original:
-                    continua_seeu_apos_login(driver_original)
+                janela_atual_seeu = driver.current_window_handle
+                todas_janelas_atualis = driver.window_handles
+                novas_abas_atuais = [ janela_atual for janela_atual in todas_janelas_atualis if janela_atual != janela_atual_seeu]
+                
+                if novas_abas_atuais:
+                    nova_aba_atual = novas_abas_atuais[0]
                     
+                    if not isinstance(nova_aba_atual, str):
+                        nova_aba_atual = str(nova_aba_atual)
+                        
+                    driver.switch_to.window(nova_aba_atual)
+                
+                    logging.info(f'Url atual: {driver.current_url}')
+                    logging.info('Etapa de autenticacao finalizada')
+                    
+                    continua_seeu_apos_login(driver)
     except Exception as e:
         print(f"Erro ao acessar elementos na nova aba: {e}")
+        driver.close()
     
     
-
-
 def continua_seeu_apos_login(driver):
-    logging.info(driver)
-    iframe = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, 'mainFrame')))
+    try:
+        logging.info(driver)
+        iframe = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, 'mainFrame')))
         
-    main_frame = driver.switch_to.frame(iframe)
+        html_externo = iframe.get_attribute('outerHTML')
+        print("HTML Externo:")
+        print(html_externo)
+        
+        driver.switch_to.frame(iframe)
+    except Exception as e:
+        logger.error(e)
+        logger.info('Ocorreu uma falha ao autenticar')
+    
+    logger.info('Acessou SEEU')
+    
+    time.sleep(2)
+    
+def selecionar_perfil_seeu(driver):
+    try:
+        select = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.XPATH,
+                                                '//a[contains(text(), "Analista Judiciário")]'))).click()
+
+        logging.info('Clicando no perfil Analista Judiciário')
+    except Exception as e:
+        logging.info('Nao foi possivel selecionar o perfil')
+        logging.info('Continuando . . .')
