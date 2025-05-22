@@ -1,5 +1,4 @@
 from django import shortcuts
-from django.conf import settings
 
 import forms
 import utils
@@ -9,7 +8,6 @@ import utils
 def index(request):
     return shortcuts.render(request, 'index.html', {
         'title': 'Bem vindo!!',
-        'base_dir': settings.BASE_DIR,
     })
 
 
@@ -23,8 +21,6 @@ def login(request):
 
     return shortcuts.render(request, 'login.html', {
         'form': form,
-        'base_dir': settings.BASE_DIR,
-        'static_root': settings.STATIC_ROOT,
     })
 
 
