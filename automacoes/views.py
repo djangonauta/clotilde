@@ -189,7 +189,19 @@ def loginSeeu(id_automacao):
                 driver.find_element(By.ID, "kc-login").click()
                 
                 logging.info('Etapa de autenticacao finalizada')
+                
+                if driver_original:
+                    continua_seeu_apos_login(driver_original)
+                    
     except Exception as e:
         print(f"Erro ao acessar elementos na nova aba: {e}")
-        
     
+    
+
+
+def continua_seeu_apos_login(driver):
+    logging.info(driver)
+    iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, 'mainFrame')))
+        
+    main_frame = driver.switch_to.frame(iframe)
