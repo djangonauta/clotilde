@@ -1,7 +1,6 @@
 import multiprocessing
 import os
 import os.path
-import signal
 import sys
 import time
 import traceback
@@ -20,7 +19,7 @@ import utils
 from . import models
 
 
-def verificar(request, id_automacao):
+def verificar_automacao(request, id_automacao):
     automacao = shortcuts.get_object_or_404(models.Automacao, pk=id_automacao)
     return http.JsonResponse({
         'status': automacao.status,
@@ -29,21 +28,22 @@ def verificar(request, id_automacao):
     })
 
 
-def cancelar(request, id_processo):
-    settings.PROCESSOS[id_processo].terminate()
-    return http.JsonResponse({'mensagem': 'Processo sinalizado para finalização'})
-
-
-def pausar(request, id_processo):
+def pausar_processo(request, id_processo):
     pid = settings.PROCESSOS[id_processo].pid
-    os.kill(pid, signal.SIGSTOP)
+    utils.pausar_processo(pid)
     return http.JsonResponse({'mensagem': 'Processo pausado com sucesso'})
 
 
-def continuar(request, id_processo):
+def continuar_processo(request, id_processo):
     pid = settings.PROCESSOS[id_processo].pid
-    os.kill(pid, signal.SIGCONT)
+    utils.continuar_processo(pid)
     return http.JsonResponse({'mensagem': 'Processo continuado com sucesso'})
+
+
+def cancelar_processo(request, id_processo):
+    processo = settings.PROCESSOS[id_processo]
+    utils.cancelar_processo(processo)
+    return http.JsonResponse({'mensagem': 'Processo sinalizado para finalização'})
 
 
 def iniciar(request):
@@ -74,7 +74,7 @@ def tarefa(id_automacao):
     try:
         options = Options()
         driver = webdriver.Chrome(
-            service=Service(os.path.expanduser('~/chromedriver')),
+            service=Service(os.path.expanduser(utils.caminho_driver_chrome())),
             options=options,
         )
         driver.implicitly_wait(3)

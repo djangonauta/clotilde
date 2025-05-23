@@ -10,7 +10,8 @@ Requisitos:
 ### Após clonar o projeto mude para o diretório de instalação e instale suas dependências via Poetry
 
 ```bash
-poetry install --with dev
+poetry install --with dev # windows
+poetry install --with dev,unix # linux
 ```
 
 ## Comandos de execução

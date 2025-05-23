@@ -1,10 +1,9 @@
 from django import shortcuts
 
 import forms
-import utils
 
 
-@utils.sessao_possui_credenciais
+# @utils.sessao_possui_credenciais
 def index(request):
     return shortcuts.render(request, 'index.html', {
         'title': 'Bem vindo!!',

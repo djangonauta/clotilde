@@ -34,14 +34,14 @@ class Api:
         return '1.0.0'
 
 
-if __name__ == '__main__':
+def main():
     t = threading.Thread(target=start_django_server)
     t.daemon = True
     t.start()
 
     time.sleep(1)
 
-    window = webview.create_window(
+    webview.create_window(
         title='Clotilde',
         url='http://127.0.0.1:8000',
         js_api=Api(),
@@ -52,4 +52,8 @@ if __name__ == '__main__':
         confirm_close=True,
         background_color='#FFFFFF'
     )
-    webview.start(gui='qt')
+    webview.start()
+
+
+if __name__ == '__main__':
+    main()

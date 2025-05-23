@@ -6,8 +6,8 @@ app_name = 'automacoes'
 
 urlpatterns = [
     urls.path('iniciar/', views.iniciar, name='iniciar'),
-    urls.path('verificar/<str:id_automacao>/', views.verificar, name='verificar'),
-    urls.path('cancelar/<str:id_processo>/', views.cancelar, name='cancelar'),
-    urls.path('pausar/<str:id_processo>/', views.pausar, name='pausar'),
-    urls.path('continuar/<str:id_processo>/', views.continuar, name='continuar'),
+    urls.path('verificar/<str:id_automacao>/', views.verificar_automacao, name='verificar_automacao'),
+    urls.path('pausar/<str:id_processo>/', views.pausar_processo, name='pausar_processo'),
+    urls.path('continuar/<str:id_processo>/', views.continuar_processo, name='continuar_processo'),
+    urls.path('cancelar/<str:id_processo>/', views.cancelar_processo, name='cancelar_processo'),
 ]
