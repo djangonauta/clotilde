@@ -26,13 +26,13 @@ logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
 
-def verificar(request, id_automacao):
-    automacao = shortcuts.get_object_or_404(models.Automacao, pk=id_automacao)
-    return http.JsonResponse({
-        'status': automacao.status,
-        'id_automacao': id_automacao,
-        'porcentagem': automacao.porcentagem,
-    })
+# def verificar(request, id_automacao):
+#     automacao = shortcuts.get_object_or_404(models.Automacao, pk=id_automacao)
+#     return http.JsonResponse({
+#         'status': automacao.status,
+#         'id_automacao': id_automacao,
+#         'porcentagem': automacao.porcentagem,
+#     })
 
 
 def cancelar(request, id_processo):
@@ -183,7 +183,7 @@ def loginSeeu(id_automacao):
                 if not isinstance(nova_aba, str):
                     nova_aba = str(nova_aba)
                 
-                time.sleep(0.5)
+                time.sleep(1.0)
                 
                 driver.switch_to.window(str(nova_aba))
                 
@@ -375,14 +375,45 @@ def acessar_lista_atuacao(driver):
         locator_value = f"#{locator_value} li"
         locator_type = 'css'
         elementos = acessar_elementos(driver, locator_value, locator_type)
-        acessar_vara(elementos)
+        acessar_vara(driver, elementos)
         
 
-def acessar_vara(elementos):
+def acessar_vara(driver, elementos):
     locator_value = 'a'
     locator_type = 'tag'
     for elemento in elementos:
         if existe_elemento(elemento, locator_value, locator_type):
             logger.info(f'Acessando a vara: {debug_elemento(elemento)}')
             acessar_elemento(elemento, locator_value, locator_type).click()
+            driver.switch_to.default_content()
+            locator_value = 'mainFrame'
+            if existe_elemento(driver, locator_value):
+                main_frame = acessar_elemento(driver, locator_value)
+                driver.switch_to.frame(main_frame)
+                
+                logger.info('Recarregar os elementos na tela de varas')
+                
+                # Abre o primeiro shadowroot
+                shadow_host_01 = driver.find_element(By.CSS_SELECTOR, '#header')
+                shadow_root_01 = shadow_host_01.shadow_root
+                
+                logger.info('Abre novamente o shadow root')
+                
+                
+                # Elemento de texto começa a partir do terceiro filho
+                count = 3
+                
+                try:
+                    while True:
+                        # Localiza a vara a ser trocada
+                        selectResult = shadow_root_01.find_element(By.CSS_SELECTOR,
+                                                                'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text
+                        driver.execute_script("arguments[0].click();", element_in_shadow)
+                        logger.info(f'Nome da Vara: {selectResult}')
+                except Exception as e:
+                    logging.info(repr(e))
+                    
+            
+            
+            
             

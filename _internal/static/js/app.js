@@ -34,7 +34,7 @@ function configurarAutomacoes() {
       const id_automacao = data.id_automacao;
       id_processo = data.id_processo;
 
-      poolling = setInterval(verificar, 200);
+      poolling = setInterval(verificar, 1000000);
       async function verificar() {
         const response = await fetch('/automacoes/verificar/' + id_automacao + '/', {
           headers: {
