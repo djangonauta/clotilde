@@ -7,6 +7,7 @@ from wsgiref import simple_server
 import webview
 
 import dj
+import utils
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -52,7 +53,11 @@ def main():
         confirm_close=True,
         background_color='#FFFFFF'
     )
-    webview.start()
+    kwargs = {}
+    if not utils.plataforma_windows():
+        kwargs.update(gui='qt')
+
+    webview.start(**kwargs)
 
 
 if __name__ == '__main__':
