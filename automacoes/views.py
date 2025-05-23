@@ -26,13 +26,13 @@ logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
 
-# def verificar(request, id_automacao):
-#     automacao = shortcuts.get_object_or_404(models.Automacao, pk=id_automacao)
-#     return http.JsonResponse({
-#         'status': automacao.status,
-#         'id_automacao': id_automacao,
-#         'porcentagem': automacao.porcentagem,
-#     })
+def verificar(request, id_automacao):
+    automacao = shortcuts.get_object_or_404(models.Automacao, pk=id_automacao)
+    return http.JsonResponse({
+        'status': automacao.status,
+        'id_automacao': id_automacao,
+        'porcentagem': automacao.porcentagem,
+    })
 
 
 def cancelar(request, id_processo):
@@ -214,17 +214,136 @@ def loginSeeu(id_automacao):
         driver.close()
     
     
+def debug_elemento(elemento, prefixo=""):
+    """Debug rápido de elemento"""
+    
+    attrs = []
+    for attr in ['id', 'class', 'tag', 'type']:
+        val = elemento.get_attribute(attr)
+        if val:
+            attrs.append(f"{attr}={val}")
+    
+    texto = elemento.text.strip()[:30]
+    status = "✅" if elemento.is_displayed() else "❌"
+    
+    linha = f"{prefixo}{status} {elemento.tag_name}({', '.join(attrs)})"
+    if texto:
+        linha += f" → '{texto}'"
+    
+    print(linha)
+
+
+def existe_id(driver, id_element, timout=10):
+    try:
+        elemento = WebDriverWait(driver, timout).until(
+                EC.presence_of_element_located((By.ID, id_element)))
+        debug_elemento(elemento, id_element)
+        return True
+    except:
+        return False
+    
+
+def existe_elemento(driver, locator_value, locator_type="id", timeout=10):
+    locator_map = {
+        'id': By.ID,
+        'class': By.CLASS_NAME,
+        'xpath': By.XPATH,
+        'css': By.CSS_SELECTOR,
+        'name': By.NAME,
+        'tag': By.TAG_NAME,
+        'link_text': By.LINK_TEXT,
+        'partial_link_text': By.PARTIAL_LINK_TEXT
+    }
+    
+    try:
+        locator_type_lower = locator_type.lower()
+        if locator_type_lower not in locator_map:
+            raise ValueError(f"O Tipo de localizador '{locator_type}' não é válido.")
+        
+        by_locator = locator_map[locator_type_lower]
+        
+        WebDriverWait(driver, timeout).until(
+                EC.presence_of_element_located((by_locator, locator_value)))
+      
+        return True
+    except Exception as e:
+        logger.error(f"Elemento não encontrado: {locator_type}='{locator_value}' - {str(e)}")
+        return False
+    
+    
+def acessar_elemento(driver, locator_value, locator_type="id", timout=10):
+    locator_map = {
+        'id': By.ID,
+        'class': By.CLASS_NAME,
+        'xpath': By.XPATH,
+        'css': By.CSS_SELECTOR,
+    }
+    
+    by_locator = locator_map[locator_type.lower()]
+    
+    elemento = WebDriverWait(driver, timout).until(
+        EC.presence_of_element_located((by_locator, locator_value))
+    )
+
+    debug_elemento(elemento)
+    
+    return elemento
+
+
+def acessar_elementos(driver, locator_value, locator_type="id", timout=10) -> list:
+    locator_map = {
+        'id': By.ID,
+        'class': By.CLASS_NAME,
+        'xpath': By.XPATH,
+        'css': By.CSS_SELECTOR,
+    }
+    
+    by_locator = locator_map[locator_type.lower()]
+    
+    try: 
+        WebDriverWait(driver, timout).until(
+            EC.presence_of_element_located((by_locator, locator_value))
+        )
+        elementos = driver.find_elements(by_locator, locator_value)
+        
+        for elemento in elementos:
+            debug_elemento(elemento)
+        
+        return elementos
+    except Exception as e:
+        logger.error(f'Nenhum elemento encontrado: {e}')
+        return []
+    
+    
+
+def acessar_elemento(driver, locator_value, locator_type="id", timout=10):
+    locator_map = {
+        'id': By.ID,
+        'class': By.CLASS_NAME,
+        'xpath': By.XPATH,
+        'css': By.CSS_SELECTOR,
+        'tag': By.TAG_NAME
+    }
+    
+    by_locator = locator_map[locator_type.lower()]
+    
+    elemento = WebDriverWait(driver, timout).until(
+        EC.presence_of_element_located((by_locator, locator_value))
+    )
+
+    debug_elemento(elemento)
+    
+    return elemento
+  
 def continua_seeu_apos_login(driver):
     try:
         logging.info(driver)
-        iframe = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, 'mainFrame')))
-        
-        html_externo = iframe.get_attribute('outerHTML')
-        print("HTML Externo:")
-        print(html_externo)
-        
-        driver.switch_to.frame(iframe)
+        if existe_elemento(driver, 'mainFrame'):
+            iframe = acessar_elemento(driver, 'mainFrame')        
+            driver.switch_to.frame(iframe)
+            
+            acessar_lista_atuacao(driver)
+            
     except Exception as e:
         logger.error(e)
         logger.info('Ocorreu uma falha ao autenticar')
@@ -233,13 +352,37 @@ def continua_seeu_apos_login(driver):
     
     time.sleep(2)
     
+    
 def selecionar_perfil_seeu(driver):
+    """
+        Seleção de Perfil no SEEU
+    """
     try:
-        select = WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.XPATH,
-                                                '//a[contains(text(), "Analista Judiciário")]'))).click()
+        if existe_elemento(driver, '//a[contains(text(), "Analista Judiciário")]', 'xpath'):
+            WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.XPATH,
+                                                    '//a[contains(text(), "Analista Judiciário")]'))).click()
 
-        logging.info('Clicando no perfil Analista Judiciário')
+            logging.info('Clicando no perfil Analista Judiciário')
     except Exception as e:
         logging.info('Nao foi possivel selecionar o perfil')
         logging.info('Continuando . . .')
+        
+        
+def acessar_lista_atuacao(driver):
+    locator_value = 'listaAreavara'
+    if existe_elemento(driver, locator_value):
+        locator_value = f"#{locator_value} li"
+        locator_type = 'css'
+        elementos = acessar_elementos(driver, locator_value, locator_type)
+        acessar_vara(elementos)
+        
+
+def acessar_vara(elementos):
+    locator_value = 'a'
+    locator_type = 'tag'
+    for elemento in elementos:
+        if existe_elemento(elemento, locator_value, locator_type):
+            logger.info(f'Acessando a vara: {debug_elemento(elemento)}')
+            acessar_elemento(elemento, locator_value, locator_type).click()
+            
