@@ -277,19 +277,18 @@ def acessar_elemento(driver, locator_value, locator_type="id", timout=10):
         'class': By.CLASS_NAME,
         'xpath': By.XPATH,
         'css': By.CSS_SELECTOR,
+        'tag': By.TAG_NAME
     }
     
     by_locator = locator_map[locator_type.lower()]
-    
     elemento = WebDriverWait(driver, timout).until(
         EC.presence_of_element_located((by_locator, locator_value))
     )
-
     debug_elemento(elemento)
     
     return elemento
-
-
+    
+    
 def acessar_elementos(driver, locator_value, locator_type="id", timout=10) -> list:
     locator_map = {
         'id': By.ID,
@@ -314,26 +313,8 @@ def acessar_elementos(driver, locator_value, locator_type="id", timout=10) -> li
         logger.error(f'Nenhum elemento encontrado: {e}')
         return []
     
-    
 
-def acessar_elemento(driver, locator_value, locator_type="id", timout=10):
-    locator_map = {
-        'id': By.ID,
-        'class': By.CLASS_NAME,
-        'xpath': By.XPATH,
-        'css': By.CSS_SELECTOR,
-        'tag': By.TAG_NAME
-    }
-    
-    by_locator = locator_map[locator_type.lower()]
-    
-    elemento = WebDriverWait(driver, timout).until(
-        EC.presence_of_element_located((by_locator, locator_value))
-    )
 
-    debug_elemento(elemento)
-    
-    return elemento
   
 def continua_seeu_apos_login(driver):
     try:
@@ -342,7 +323,21 @@ def continua_seeu_apos_login(driver):
             iframe = acessar_elemento(driver, 'mainFrame')        
             driver.switch_to.frame(iframe)
             
-            acessar_lista_atuacao(driver)
+            driver = acessar_lista_atuacao(driver) #l:619 (method: automacao) (TaskIntimarPessoalmente_SEEU_11)
+            
+            if not driver:
+                raise Exception('Falha ao mudar de vara')
+            
+            logger.info('Acessou a mesa do analista') #l:628
+            
+            continuacao = True
+            while continuacao:
+                continuacao = False
+                # PÁGINA 1
+                quantidade = pagina_1(driver)
+                logger.info('Finalizou Página 1')
+                
+            
             
     except Exception as e:
         logger.error(e)
@@ -369,13 +364,21 @@ def selecionar_perfil_seeu(driver):
         logging.info('Continuando . . .')
         
         
-def acessar_lista_atuacao(driver):
+def acessar_lista_atuacao(driver): #l:526 (ExecuteAlteraVara - TaskIntimarPessoalmente_SEEU_011)
     locator_value = 'listaAreavara'
     if existe_elemento(driver, locator_value):
         locator_value = f"#{locator_value} li"
         locator_type = 'css'
         elementos = acessar_elementos(driver, locator_value, locator_type)
-        acessar_vara(driver, elementos)
+        result = acessar_vara(driver, elementos) # l:528 (TaskIntimarPessoalmente_SEEU_011.PY)
+        
+        if not result:
+            logger.info('Nao foi possivel alterar a vara')
+            logger.info('Finalizando robo')
+            
+            return result
+        
+        return driver
         
 
 def acessar_vara(driver, elementos):
@@ -393,12 +396,13 @@ def acessar_vara(driver, elementos):
                 
                 logger.info('Recarregar os elementos na tela de varas')
                 
+                time.sleep(0.5)
+                
                 # Abre o primeiro shadowroot
                 shadow_host_01 = driver.find_element(By.CSS_SELECTOR, '#header')
                 shadow_root_01 = shadow_host_01.shadow_root
                 
                 logger.info('Abre novamente o shadow root')
-                
                 
                 # Elemento de texto começa a partir do terceiro filho
                 count = 3
@@ -406,13 +410,76 @@ def acessar_vara(driver, elementos):
                 try:
                     while True:
                         # Localiza a vara a ser trocada
-                        selectResult = shadow_root_01.find_element(By.CSS_SELECTOR,
+                        select_result = shadow_root_01.find_element(By.CSS_SELECTOR,
                                                                 'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text
-                        driver.execute_script("arguments[0].click();", element_in_shadow)
-                        logger.info(f'Nome da Vara: {selectResult}')
+                        
+                        select_restul_sem_espacos = str(select_result).strip()
+                        nome_vara = str('TJPA - MARABÁ - CORREGEDORIA DOS PRESÍDIOS').strip() #TODO PASSAR VARIÁVEL COMO PARÂMETRO
+                        if select_restul_sem_espacos == nome_vara:
+                            element_in_shadow = shadow_root_01.find_element(By.CSS_SELECTOR,
+                                                    'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')')
+                            
+                            driver.execute_script("arguments[0].click();", element_in_shadow)
+                            logger.info(f'Nome da Vara: {nome_vara}')
+                            
+                            break
+                        else:
+                            count += 1
+                            
                 except Exception as e:
-                    logging.info(repr(e))
+                    logger.info(repr(e))
+                    logger.info(f'Não foi possivel localizar a vara informada: {nome_vara}')
                     
+                    return False
+                
+                return True
+                    
+       
+def pagina_1(driver): #l:50 (pagina_1)
+    locator_value = '//*[@name="userMainFrame"]'
+    locator_type = 'xpath'
+    
+    if existe_elemento(driver, locator_value, locator_type):
+        user_main_frame =  acessar_elemento(driver, locator_value, locator_type)
+        driver.switch_to.frame(user_main_frame)
+        
+        while elemento_por_texto_em_lista_by_tag(driver, 'h3', 'Mesa do(a) Analista Judiciário') is None:
+            logger.info('Espera Página de Mesa do Analista Judiciário')
+            time.sleep(0.5)
+            
+        # ACESSA ABA OUTROS CUMPRIMENTOS
+        acessar_aba_outros_cumprimentos(driver)
+        
+            
+
+def acessar_aba_outros_cumprimentos(driver):
+    locator_value = '//*[@name="tabOutrosCumprimentos"]'
+    locator_type = 'xpath'
+    
+    if existe_elemento(driver, locator_value, locator_type):
+        tab_outros_cumprimentos = acessar_elemento(driver, locator_value, locator_type)
+        tab_outros_cumprimentos.click()
+
+        
+
+def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_incluso=None): #l:56
+    print("elemento_por_texto_em_lista_by_tag -", texto)
+    repete_interno = True
+    while repete_interno:
+        repete_interno = repete
+        elementos = driver.find_elements(by=By.TAG_NAME, value=tag)
+        for elemento in elementos:
+            continua = True
+            if nao_incluso is not None: 
+                continua = False 
+                if nao_incluso not in elemento.text:
+                    continua = True
+            if texto in elemento.text and continua \
+                and "Traceback (most recent call last)" not in elemento.text:
+                return elemento
+        if self.trata_solicitacao is not None:
+            self.trata_solicitacao()
+    return None 
             
             
             
