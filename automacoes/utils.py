@@ -4,10 +4,15 @@ import os
 import os.path
 import platform
 import signal
+import sys
 import tkinter as tk
 from tkinter import messagebox
 
 from django import shortcuts
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 def sessao_possui_credenciais(view_func):
@@ -32,12 +37,33 @@ def plataforma_windows():
     return platform.system().lower() == 'windows'
 
 
+def is_frozen():
+    return getattr(sys, 'frozen', False)
+
+
 def caminho_driver_chrome():
+    # if is_frozen():
+    # return os.path.join(sys._MEIPASS, 'chromedriver.exe')
+
     caminho = '~/chromedriver'
     if plataforma_windows():
         caminho += '.exe'
 
     return os.path.expanduser(caminho)
+
+
+def obter_driver_chrome(options=None):
+    if options is None:
+        options = Options()
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument("--disable-gpu")
+
+    return webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        # service=Service(utils.caminho_driver_chrome()),
+        options=options,
+    )
 
 
 def pausar_processo(pid):

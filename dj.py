@@ -12,12 +12,14 @@ import views
 
 DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+STATIC_ROOT = os.path.join(BASE_DIR, '_internal', 'assets')
 if getattr(sys, 'frozen', False):
-    BASE_DIR = sys._MEIPASS
     DEBUG = False
+    BASE_DIR = sys._MEIPASS
+    STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
-STATIC_DIR = os.path.join(BASE_DIR, '_internal/static')
+STATIC_DIR = os.path.join(BASE_DIR, '_internal', 'static')
 DB_PATH = os.path.join(BASE_DIR, 'db.sqlite3')
 
 settings.configure(
@@ -66,7 +68,7 @@ settings.configure(
     },
     STATIC_URL='/static/',
     STATICFILES_DIRS=[STATIC_DIR],
-    STATIC_ROOT='_internal/assets/',
+    STATIC_ROOT=STATIC_ROOT,
     ALLOWED_HOSTS=['localhost', '127.0.0.1'],
     PROCESSOS={},
 )

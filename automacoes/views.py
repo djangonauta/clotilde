@@ -1,6 +1,4 @@
 import multiprocessing
-import os
-import os.path
 import sys
 import time
 import traceback
@@ -8,15 +6,10 @@ import uuid
 
 from django import http, shortcuts
 from django.conf import settings
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-import utils
-
-from . import models
+from . import models, utils
 
 
 def verificar_automacao(request, id_automacao):
@@ -72,11 +65,7 @@ def iniciar_processo(id_automacao):
 def tarefa(id_automacao):
     automacao = models.Automacao.objects.get(pk=id_automacao)
     try:
-        options = Options()
-        driver = webdriver.Chrome(
-            service=Service(os.path.expanduser(utils.caminho_driver_chrome())),
-            options=options,
-        )
+        driver = utils.obter_driver_chrome()
         driver.implicitly_wait(3)
         driver.get('https://demoqa.com/forms')
         driver.find_element(
@@ -128,7 +117,7 @@ def tarefa(id_automacao):
         automacao.save()
         time.sleep(.5)
 
-        utils.exibir_dialogo_esperar('Automação finalizada')
+        # utils.exibir_dialogo_esperar('Automação finalizada')
 
         driver.find_element(By.ID, 'closeLargeModal').click()
         driver.quit()

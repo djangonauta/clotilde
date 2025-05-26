@@ -45,5 +45,5 @@ poetry run python ./main.py
 ### Construir o projeto para distribuição na plataforma Windows
 
 ```bash
-poetry run pyinstaller .\clotilde.spec --noconfirm
+poetry run pyinstaller .\app.spec --noconfirm
 ```

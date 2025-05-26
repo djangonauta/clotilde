@@ -7,7 +7,7 @@ from wsgiref import simple_server
 import webview
 
 import dj
-import utils
+from automacoes import utils
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 

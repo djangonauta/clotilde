@@ -1,4 +1,5 @@
 import os
+import os.path
 
 block_cipher = None
 base_dir = os.path.abspath(os.getcwd())
@@ -7,6 +8,51 @@ added_files = [
     ('_internal/assets', 'assets'),
     ('templates', 'templates'),
     ('db.sqlite3', '.'),
+]
+
+excludes = [
+    # Módulos de desenvolvimento e testes
+    'unittest', 'doctest', 'pdb', 'pydoc',  # 'inspect',
+    'debugpy', 'pytest', 'coverage',
+
+    # Módulos científicos pesados (se não utilizados)
+    'numpy', 'scipy', 'pandas', 'matplotlib', 'plotly',
+    'seaborn', 'sklearn', 'tensorflow', 'torch',
+
+    # Servidores web alternativos
+    'gunicorn', 'uwsgi', 'waitress', 'cherrypy',
+    'tornado', 'aiohttp', 'fastapi', 'flask',
+
+    # Bancos de dados não utilizados
+    'mysql', 'MySQLdb', 'pymysql', 'cx_Oracle',
+    'pyodbc', 'redis', 'pymongo',
+    'cassandra', 'elasticsearch',
+
+    # Módulos do sistema operacional não necessários
+    'curses', 'readline', 'rlcompleter',
+
+    # Compiladores e ferramentas de build
+    # 'distutils', 'setuptools', 'pip', 'wheel',
+    # 'pkg_resources._vendor',
+
+    # Ferramentas de documentação
+    'sphinx', 'docutils', 'markdown',
+
+    # Módulos de rede avançados
+    'ftplib', 'imaplib', 'nntplib', 'poplib',
+    'smtplib', 'telnetlib',
+
+    # Módulos de compressão não essenciais
+    # 'bz2', 'lzma', 'gzip',  'tarfile',
+
+    # Processamento de imagem (se não utilizado)
+    'PIL.ImageQt', 'PIL.ImageTk',
+
+    # Módulos de criptografia avançada (manter apenas o necessário)
+    'cryptography.hazmat.backends.openssl.x25519',
+    'cryptography.hazmat.backends.openssl.x448',
+    'cryptography.hazmat.backends.openssl.ed25519',
+    'cryptography.hazmat.backends.openssl.ed448',
 ]
 
 # Pacotes necessários que o PyInstaller pode não detectar automaticamente
@@ -24,27 +70,18 @@ hidden_imports = [
     'django.template.loader_tags',
     'django.templatetags',
     'django.templatetags.static',
-    'django.templatetags.i18n',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.db.models.query',
-    'django.db.models.expressions',
-    'django.db.models.sql',
-    'django.db.models.functions',
-    'django.db.models.lookups',
-    'django.db.models.aggregates',
     'webview',
     'webview.platforms.winforms',
-    'webview.platforms.gtk',
     'widget_tweaks',
     'widget_tweaks.templatetags',
     'widget_tweaks.templatetags.widget_tweaks',
-    'jinja2',
-    'asgiref',
-    'sqlparse',
+    'whitenoise',
+    'whitenoise.middleware',
 ]
 
 a = Analysis(
@@ -56,7 +93,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib', 'notebook', 'scipy', 'pandas', 'PIL'],
+    excludes=excludes,
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
