@@ -15,6 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 
 import utils
@@ -295,6 +296,7 @@ def acessar_elementos(driver, locator_value, locator_type="id", timout=10) -> li
         'class': By.CLASS_NAME,
         'xpath': By.XPATH,
         'css': By.CSS_SELECTOR,
+        'tag': By.TAG_NAME
     }
     
     by_locator = locator_map[locator_type.lower()]
@@ -459,8 +461,80 @@ def acessar_aba_outros_cumprimentos(driver):
     if existe_elemento(driver, locator_value, locator_type):
         tab_outros_cumprimentos = acessar_elemento(driver, locator_value, locator_type)
         tab_outros_cumprimentos.click()
-
         
+        tabela = buscar_tabela_por_texto(driver, 'Para Expedir', nao_incluso='Outros Cumprimentos') 
+        linha_tabela = elemento_por_texto_em_lista_by_tag(tabela, 'tr', 'Mandado')
+        logger.info(linha_tabela)
+ 
+        
+def buscar_tabela_por_texto(driver, texto, id=False, repete=False, completo=False, nao_incluso=None): #l:285 (Metodos.py)
+    logger.info(f'buscar_tabela_por_texto - {texto}')
+    controlar_tempo_espera(True)
+    repete_interno = True
+    
+    while repete_interno:
+        time.sleep(0.1)
+        identificacao_erros(driver)
+        controlar_tempo_espera(300)
+        repete_interno = repete
+        # tabelas = driver.find_elements(by=By.TAG_NAME, value='table')
+        locator_value = 'table'
+        locator_type = 'tag'
+        if existe_elemento(driver, locator_value, locator_type):
+            tabelas = acessar_elementos(driver, locator_value, locator_type)
+            for index, tabela in enumerate(tabelas):
+                if "Traceback (most recent call last)" not in tabela.text:
+                    continua = True
+                    if nao_incluso is not None:
+                        continua = False
+                        if nao_incluso not in tabela.text:
+                            continua = True
+                    if texto in tabela.text and continua:
+                        if completo:
+                            return index, tabela, tabelas
+                        if id:
+                            return index
+                        return tabela
+    return None
+        
+    
+
+
+def controlar_tempo_espera(inicio=False, max=600): #l:199 (Metodos.py)
+        if inicio:
+            tempo_espera = 0
+        else:
+            tempo_espera += 1
+            if tempo_espera % 60 == 0:
+                print("Mais 60", tempo_espera)
+        if tempo_espera >= max:
+            print("Excedeu o tempo")
+            raise Exception("Excedeu o tempo")
+        # if trata_solicitacao is not None:
+        #     self.trata_solicitacao()
+            
+            
+def identificacao_erros(driver): #l:77 (Metodos.py)
+    locator_value = '//*[@id="pageBody"]/ul/li'
+    locator_type = 'xpath'
+    
+    # if existe_elemento(driver, locator_value, locator_type):
+    if _check_exists_by_xpath(driver, locator_value): #
+        if 'Erro inesperado, por favor tente novamente' in \
+            driver.find_element(by=By.XPATH, value=locator_value).text:
+            url = driver.current_url
+            driver.get(url)
+            logger.info("Retornando ao ponto inicial devido a erros")
+            raise Exception("Retornando ao ponto inicial devido a erros")        
+
+
+def _check_exists_by_xpath(driver, xpath): #l:53 (Metodos.py)
+    try:
+        driver.find_element(by=By.XPATH, value=xpath)
+    except NoSuchElementException:
+        return False
+    return True
+
 
 def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_incluso=None): #l:56
     print("elemento_por_texto_em_lista_by_tag -", texto)
@@ -477,8 +551,8 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
             if texto in elemento.text and continua \
                 and "Traceback (most recent call last)" not in elemento.text:
                 return elemento
-        if self.trata_solicitacao is not None:
-            self.trata_solicitacao()
+        # if self.trata_solicitacao is not None:
+        #     self.trata_solicitacao()
     return None 
             
             
