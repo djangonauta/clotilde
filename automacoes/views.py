@@ -20,6 +20,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 import utils
 import time
+import re
 
 from . import models
 
@@ -337,7 +338,9 @@ def continua_seeu_apos_login(driver):
                 continuacao = False
                 # PÁGINA 1
                 quantidade = pagina_1(driver)
-                logger.info('Finalizou Página 1')
+                if quantidade > 0:
+                    quantidade = True
+                    logger.info(f'Finalizou Página 1 com quantidade {quantidade}')
                 
             
             
@@ -381,7 +384,11 @@ def acessar_lista_atuacao(driver): #l:526 (ExecuteAlteraVara - TaskIntimarPessoa
             return result
         
         return driver
-        
+ 
+def filtrar_por_varas_excecucoes_penais(nome_vara):
+    paradrao_explicito =  r'\b(Execução|Execuções|Penal|Penais)\b'
+    
+    return re.findall(paradrao_explicito, nome_vara, re.IGNORECASE)       
 
 def acessar_vara(driver, elementos):
     locator_value = 'a'
@@ -413,20 +420,21 @@ def acessar_vara(driver, elementos):
                     while True:
                         # Localiza a vara a ser trocada
                         select_result = shadow_root_01.find_element(By.CSS_SELECTOR,
-                                                                'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text
+                            'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text
                         
-                        select_restul_sem_espacos = str(select_result).strip()
-                        nome_vara = str('TJPA - MARABÁ - CORREGEDORIA DOS PRESÍDIOS').strip() #TODO PASSAR VARIÁVEL COMO PARÂMETRO
-                        if select_restul_sem_espacos == nome_vara:
-                            element_in_shadow = shadow_root_01.find_element(By.CSS_SELECTOR,
-                                                    'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')')
-                            
-                            driver.execute_script("arguments[0].click();", element_in_shadow)
-                            logger.info(f'Nome da Vara: {nome_vara}')
-                            
-                            break
-                        else:
-                            count += 1
+                        nome_vara = str(select_result).strip()
+                        if nome_vara:
+                            filtro_vara = filtrar_por_varas_excecucoes_penais(nome_vara)
+                            if len(filtro_vara) > 0:
+                                element_in_shadow = shadow_root_01.find_element(By.CSS_SELECTOR,
+                                                        'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')')
+                                
+                                driver.execute_script("arguments[0].click();", element_in_shadow)
+                                logger.info(f'Nome da Vara: {nome_vara}')
+                                
+                                break
+                            else:
+                                count += 1
                             
                 except Exception as e:
                     logger.info(repr(e))
@@ -455,6 +463,10 @@ def pagina_1(driver): #l:50 (pagina_1)
             
 
 def acessar_aba_outros_cumprimentos(driver):
+    """
+        Método pagina_1: robo clóvis
+        Acessa a aba outros cumprimentos, procura pelo cumprimento Madado e se existir clica no link da coluna para expedir (número de mandados)
+    """
     locator_value = '//*[@name="tabOutrosCumprimentos"]'
     locator_type = 'xpath'
     
@@ -463,8 +475,33 @@ def acessar_aba_outros_cumprimentos(driver):
         tab_outros_cumprimentos.click()
         
         tabela = buscar_tabela_por_texto(driver, 'Para Expedir', nao_incluso='Outros Cumprimentos') 
-        linha_tabela = elemento_por_texto_em_lista_by_tag(tabela, 'tr', 'Mandado')
-        logger.info(linha_tabela)
+        linha_tabela = elemento_por_texto_em_lista_by_tag(tabela, 'tr', 'Mandado') #l:66 (TaskIntimarPessoalmente_SEEU_011.py)
+        
+        locator_value = 'td'
+        locator_type = 'tag'
+        if existe_elemento(linha_tabela, locator_value, locator_type):
+            colunas = {
+                'para_expedir': 2,
+                'para_assinar': 3,
+                'com_urgencia': 4,
+                'devolvido_pelo_juiz': 5,
+                'decurso_de_prazo': 6 
+            }
+            dados_tabela = acessar_elementos(linha_tabela, locator_value, locator_type) #l:67 (TaskIntimarPessoalmente_SEEU_011.py)
+            
+            driver = dados_tabela[colunas['para_expedir']]
+            locator_value = 'a'
+            locator_type = 'tag'
+            if existe_elemento(driver, locator_value, locator_type):
+                tag_a = acessar_elementos(driver, locator_value, locator_type)
+                tag_a_link = tag_a[0] #l:69 (TaskIntimarPessoalmente_SEEU_011.py)
+                quantidade_madados = int(tag_a_link.text)
+                if quantidade_madados > 0:
+                    tag_a_link.click() #l:72 (TaskIntimarPessoalmente_SEEU_011.py)
+                    
+                return quantidade_madados
+                
+                
  
         
 def buscar_tabela_por_texto(driver, texto, id=False, repete=False, completo=False, nao_incluso=None): #l:285 (Metodos.py)
@@ -554,6 +591,14 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
         # if self.trata_solicitacao is not None:
         #     self.trata_solicitacao()
     return None 
+
+
+def pagina_2(driver):
+    while elemento_por_texto_em_lista_by_tag(driver, 'h3', 'Mandados') is None:
+        logger.info('Espera página de mandados')
+        time.sleep(0.5)
+        
+ 
             
             
             
