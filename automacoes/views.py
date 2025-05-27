@@ -21,6 +21,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import utils
 import time
 import re
+import copy
 
 from . import models
 
@@ -341,6 +342,8 @@ def continua_seeu_apos_login(driver):
                 if quantidade > 0:
                     quantidade = True
                     logger.info(f'Finalizou Página 1 com quantidade {quantidade}')
+                    processo = pagina_2(driver)
+                    logger.info(f'pagina_2, processo: {processo}')
                 
             
             
@@ -458,7 +461,7 @@ def pagina_1(driver): #l:50 (pagina_1)
             time.sleep(0.5)
             
         # ACESSA ABA OUTROS CUMPRIMENTOS
-        acessar_aba_outros_cumprimentos(driver)
+        return acessar_aba_outros_cumprimentos(driver)
         
             
 
@@ -498,7 +501,6 @@ def acessar_aba_outros_cumprimentos(driver):
                 quantidade_madados = int(tag_a_link.text)
                 if quantidade_madados > 0:
                     tag_a_link.click() #l:72 (TaskIntimarPessoalmente_SEEU_011.py)
-                    
                 return quantidade_madados
                 
                 
@@ -594,11 +596,35 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
 
 
 def pagina_2(driver):
+    
     while elemento_por_texto_em_lista_by_tag(driver, 'h3', 'Mandados') is None:
         logger.info('Espera página de mandados')
         time.sleep(0.5)
         
- 
+    locator_value = '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody'
+    locator_type = 'xpath'
+    
+    if existe_elemento(driver, locator_value, locator_type):
+        table = acessar_elemento(driver, locator_value, locator_type)
+        locator_value = 'tr'
+        locator_type = 'tag'
+        if existe_elemento(table, locator_value, locator_type):
+            linhas_tabela = acessar_elementos(table, locator_value, locator_type)
+            locator_value = 'td'
+            locator_type = 'tag'
+            if existe_elemento(linhas_tabela[0], locator_value, locator_type):
+                tds = acessar_elementos(linhas_tabela[0], locator_value, locator_type)
+                processo = tds[5].text  #l:85 (TaskIntimarPessoalmente_SEEU_011.py)
+                logger.info(processo)
+                if existe_elemento(tds[15], locator_value, locator_type):
+                    td_analisar = acessar_elemento(tds[15], locator_value, locator_type)
+                    locator_value = 'a'
+                    locator_type = 'tag'
+                    if existe_elemento(td_analisar, locator_value, locator_type):
+                        elemento = acessar_elemento(td_analisar, locator_value, locator_type)
+                        elemento.click()
+                        return processo
+                    
             
             
             
