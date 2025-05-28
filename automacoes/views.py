@@ -624,7 +624,7 @@ def pagina_2(driver):
             
 def pagina_3(driver):
     """
-        Preenche dos dados do Formularios de clicar para abrir o documento.
+        Acessa a página de Pré-Análise, preenche as informações Tipo do Arquivo, Modelo e clica no botão "Digitar Texto"
     """
     while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
             print("Espera Página de Arquivos")
