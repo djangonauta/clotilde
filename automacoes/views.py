@@ -344,7 +344,18 @@ def continua_seeu_apos_login(driver):
                     logger.info(f'Finalizou Página 1 com quantidade {quantidade}')
                     processo = pagina_2(driver)
                     logger.info(f'pagina_2, processo: {processo}')
-                
+                    # TODO Aqui entraria a parte do log e geração de arquivo em excell
+                    try:
+                        pagina_3(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
+                    except Exception as e:
+                        # TODO Caso ocorra excessão enviar error para o log.
+                        pass
+                        
+                    try:
+                        pagina_4(driver)
+                    except Exception as e:
+                        # TODO Caso ocorra excessão enviar error para o log.
+                        pass
             
             
     except Exception as e:
@@ -594,45 +605,16 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
         #     self.trata_solicitacao()
     return None 
 
-
-# def pagina_2(driver):
-    
-#     while elemento_por_texto_em_lista_by_tag(driver, 'h3', 'Mandados') is None:
-#         logger.info('Espera página de mandados')
-#         time.sleep(0.5)
-        
-#     locator_value = '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody'
-#     locator_type = 'xpath'
-    
-#     if existe_elemento(driver, locator_value, locator_type):
-#         table = acessar_elemento(driver, locator_value, locator_type)
-#         locator_value = 'tr'
-#         locator_type = 'tag'
-#         if existe_elemento(table, locator_value, locator_type):
-#             linhas_tabela = acessar_elementos(table, locator_value, locator_type)
-#             locator_value = 'td'
-#             locator_type = 'tag'
-#             if existe_elemento(linhas_tabela[0], locator_value, locator_type):
-#                 tds = acessar_elementos(linhas_tabela[0], locator_value, locator_type)
-#                 processo = tds[5].text  #l:85 (TaskIntimarPessoalmente_SEEU_011.py)
-#                 logger.info(processo)
-#                 if existe_elemento(tds[15], locator_value, locator_type):
-#                     td_analisar = acessar_elemento(tds[15], locator_value, locator_type)
-#                     locator_value = 'a'
-#                     locator_type = 'tag'
-#                     if existe_elemento(td_analisar, locator_value, locator_type):
-#                         elemento = acessar_elemento(td_analisar, locator_value, locator_type)
-#                         elemento.click()
-#                         return processo
-                    
          
 def pagina_2(driver):
-
+    """
+      Acessa os madados no na aba de compridos e para cada mandado clica na coluna "Pré-Análise" e em "[Analisar]"  
+    """
     while elemento_por_texto_em_lista_by_tag(driver, "h3", "Mandados") is None:
         print("Espera Página de Mandados")
         time.sleep(0.5)
 
-    table = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath', 20)
+    table = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath', 20) #l82: (TaskIntimarPessoalmente_SEEU_011.py) 
     tr = table.find_elements(by=By.TAG_NAME, value="tr")
     td = tr[0].find_elements(by=By.TAG_NAME, value="td")
     processo = td[5].text 
@@ -640,4 +622,29 @@ def pagina_2(driver):
     return processo   
             
             
+def pagina_3(driver):
+    """
+        Preenche dos dados do Formularios de clicar para abrir o documento.
+    """
+    while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+            print("Espera Página de Arquivos")
+            time.sleep(0.5)
+
+    file_type_select = acessar_elemento(driver, '//*[@id="descricaoTipoArquivo"]', 'xpath')
+    file_type_select.send_keys('Mandado')
+    type_opcao = acessar_elemento(driver, '//*[@id="101"]', 'xpath')
+    type_opcao.click()
+    
+    file_type_model = acessar_elemento(driver, '//*[@id="descricaoModelo"]', 'xpath')
+    modelo = "(Deusilene dos Santos Souza - Analista Judiciário ) - MANDADO - LIVRAMENTO CONDICIOANL" #l:21 (config.xml)
+    modelo_split = modelo.split(") - ")[-1]
+    file_type_model.send_keys(modelo_split)
+    time.sleep(1.5)
+    type_model = driver.find_element(By.XPATH, "//li[contains(text(), '"+modelo_split+"')]")
+    type_model.click()
+    
+    print("Clique no Digitar Texto")
+    type_text = acessar_elemento(driver, '//*[@id="digitarButton"]', 'xpath')
+    type_text.click()
+    print("Fim clique no Digitar Texto")
             
