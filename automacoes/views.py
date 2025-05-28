@@ -595,37 +595,49 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
     return None 
 
 
-def pagina_2(driver):
+# def pagina_2(driver):
     
-    while elemento_por_texto_em_lista_by_tag(driver, 'h3', 'Mandados') is None:
-        logger.info('Espera página de mandados')
-        time.sleep(0.5)
+#     while elemento_por_texto_em_lista_by_tag(driver, 'h3', 'Mandados') is None:
+#         logger.info('Espera página de mandados')
+#         time.sleep(0.5)
         
-    locator_value = '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody'
-    locator_type = 'xpath'
+#     locator_value = '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody'
+#     locator_type = 'xpath'
     
-    if existe_elemento(driver, locator_value, locator_type):
-        table = acessar_elemento(driver, locator_value, locator_type)
-        locator_value = 'tr'
-        locator_type = 'tag'
-        if existe_elemento(table, locator_value, locator_type):
-            linhas_tabela = acessar_elementos(table, locator_value, locator_type)
-            locator_value = 'td'
-            locator_type = 'tag'
-            if existe_elemento(linhas_tabela[0], locator_value, locator_type):
-                tds = acessar_elementos(linhas_tabela[0], locator_value, locator_type)
-                processo = tds[5].text  #l:85 (TaskIntimarPessoalmente_SEEU_011.py)
-                logger.info(processo)
-                if existe_elemento(tds[15], locator_value, locator_type):
-                    td_analisar = acessar_elemento(tds[15], locator_value, locator_type)
-                    locator_value = 'a'
-                    locator_type = 'tag'
-                    if existe_elemento(td_analisar, locator_value, locator_type):
-                        elemento = acessar_elemento(td_analisar, locator_value, locator_type)
-                        elemento.click()
-                        return processo
+#     if existe_elemento(driver, locator_value, locator_type):
+#         table = acessar_elemento(driver, locator_value, locator_type)
+#         locator_value = 'tr'
+#         locator_type = 'tag'
+#         if existe_elemento(table, locator_value, locator_type):
+#             linhas_tabela = acessar_elementos(table, locator_value, locator_type)
+#             locator_value = 'td'
+#             locator_type = 'tag'
+#             if existe_elemento(linhas_tabela[0], locator_value, locator_type):
+#                 tds = acessar_elementos(linhas_tabela[0], locator_value, locator_type)
+#                 processo = tds[5].text  #l:85 (TaskIntimarPessoalmente_SEEU_011.py)
+#                 logger.info(processo)
+#                 if existe_elemento(tds[15], locator_value, locator_type):
+#                     td_analisar = acessar_elemento(tds[15], locator_value, locator_type)
+#                     locator_value = 'a'
+#                     locator_type = 'tag'
+#                     if existe_elemento(td_analisar, locator_value, locator_type):
+#                         elemento = acessar_elemento(td_analisar, locator_value, locator_type)
+#                         elemento.click()
+#                         return processo
                     
-            
+         
+def pagina_2(driver):
+
+    while elemento_por_texto_em_lista_by_tag(driver, "h3", "Mandados") is None:
+        print("Espera Página de Mandados")
+        time.sleep(0.5)
+
+    table = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath', 20)
+    tr = table.find_elements(by=By.TAG_NAME, value="tr")
+    td = tr[0].find_elements(by=By.TAG_NAME, value="td")
+    processo = td[5].text 
+    td[15].find_elements(by=By.TAG_NAME, value="td")[1].click() # //*[@id="cumprimentoCartorioMandadoForm"]/table[4]/tbody/tr[1]/td[16]/table/tbody/tr/td[2]
+    return processo   
             
             
             
