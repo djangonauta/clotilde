@@ -343,7 +343,7 @@ def continua_seeu_apos_login(driver):
                     quantidade = True
                     logger.info(f'Finalizou Página 1 com quantidade {quantidade}')
                     processo = pagina_2(driver)
-                    logger.info(f'pagina_2, processo: {processo}')
+                    logger.info(f'Finalizou pagina_2, processo: {processo}')
                     # TODO Aqui entraria a parte do log e geração de arquivo em excell
                     try:
                         pagina_3(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
@@ -353,6 +353,7 @@ def continua_seeu_apos_login(driver):
                         
                     try:
                         pagina_4(driver)
+                        logger.info(f'Finalizou pagina_4, processo: {processo}')
                     except Exception as e:
                         # TODO Caso ocorra excessão enviar error para o log.
                         pass
@@ -467,12 +468,24 @@ def pagina_1(driver): #l:50 (pagina_1)
         user_main_frame =  acessar_elemento(driver, locator_value, locator_type)
         driver.switch_to.frame(user_main_frame)
         
-        while elemento_por_texto_em_lista_by_tag(driver, 'h3', 'Mesa do(a) Analista Judiciário') is None:
-            logger.info('Espera Página de Mesa do Analista Judiciário')
-            time.sleep(0.5)
+        if existe_elemento(driver, 'container'):
+            container = acessar_elemento(driver, 'container')
+            # driver.switch_to.frame(container)
             
-        # ACESSA ABA OUTROS CUMPRIMENTOS
-        return acessar_aba_outros_cumprimentos(driver)
+            if existe_elemento(container, 'content'):
+                content = acessar_elemento(driver, 'content')
+                # driver.switch_to.frame(content)
+                
+                if existe_elemento(content, 'mesaAnalistaForm'):
+                    form = acessar_elemento(driver, 'mesaAnalistaForm')
+                    # driver.switch_to.frame(form)
+        
+                    while elemento_por_texto_em_lista_by_tag(form, 'h3', 'Mesa do(a) Analista Judiciário') is None:
+                        logger.info('Espera Página de Mesa do Analista Judiciário')
+                        time.sleep(0.5)
+                        
+                    # ACESSA ABA OUTROS CUMPRIMENTOS
+                    return acessar_aba_outros_cumprimentos(driver)
         
             
 
@@ -591,16 +604,18 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
     repete_interno = True
     while repete_interno:
         repete_interno = repete
-        elementos = driver.find_elements(by=By.TAG_NAME, value=tag)
-        for elemento in elementos:
-            continua = True
-            if nao_incluso is not None: 
-                continua = False 
-                if nao_incluso not in elemento.text:
-                    continua = True
-            if texto in elemento.text and continua \
-                and "Traceback (most recent call last)" not in elemento.text:
-                return elemento
+        # elementos = driver.find_elements(by=By.TAG_NAME, value=tag)
+        if existe_elemento(driver, tag, 'tag'):
+            elementos = acessar_elementos(driver, tag, 'tag')
+            for elemento in elementos:
+                continua = True
+                if nao_incluso is not None: 
+                    continua = False 
+                    if nao_incluso not in elemento.text:
+                        continua = True
+                if texto in elemento.text and continua \
+                    and "Traceback (most recent call last)" not in elemento.text:
+                    return elemento
         # if self.trata_solicitacao is not None:
         #     self.trata_solicitacao()
     return None 
@@ -619,6 +634,7 @@ def pagina_2(driver):
     td = tr[0].find_elements(by=By.TAG_NAME, value="td")
     processo = td[5].text 
     td[15].find_elements(by=By.TAG_NAME, value="td")[1].click() # //*[@id="cumprimentoCartorioMandadoForm"]/table[4]/tbody/tr[1]/td[16]/table/tbody/tr/td[2]
+    time.sleep(1.5)
     return processo   
             
             
@@ -647,4 +663,23 @@ def pagina_3(driver):
     type_text = acessar_elemento(driver, '//*[@id="digitarButton"]', 'xpath')
     type_text.click()
     print("Fim clique no Digitar Texto")
+    
+
+def pagina_4(driver):
+    while elemento_por_texto_em_lista_by_tag(driver, "h3", "Digitar Documento") is None:
+        print("Espera Página de Digitar Documento")
+        time.sleep(0.5)
+
+    if existe_elemento(driver, '//*[@id="submitButton"]', 'xpath'):
+        continue_button = acessar_elemento(driver, '//*[@id="submitButton"]', 'xpath')
+        continue_button.click()
+
+        while elemento_por_texto_em_lista_by_tag(driver, "h3", "Documento") is None:
+            print("Espera Página de Documento")
+            time.sleep(0.5)
+
+        if existe_elemento(driver, '//*[@id="submitButton"]', 'xpath'):
+            save_button = acessar_elemento(driver, '//*[@id="submitButton"]', 'xpath')
+            save_button.click()
+    
             
