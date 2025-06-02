@@ -353,9 +353,20 @@ def continua_seeu_apos_login(driver):
                         
                     try:
                         pagina_4(driver)
-                        logger.info(f'Finalizou pagina_4, processo: {processo}')
+                        logger.info(f'Finalizou pagina_4')
                     except Exception as e:
                         # TODO Caso ocorra excessão enviar error para o log.
+                        pass
+                    
+                    try:
+                        pagina_5(driver)
+                        logger.info(f'Finalizou pagina_5')
+                    except Exception as e:
+                        pass
+                    
+                    try:
+                        pagina_6(driver)
+                    except Exception as e:
                         pass
             
             
@@ -666,9 +677,9 @@ def pagina_3(driver):
     
 
 def pagina_4(driver):
-    '''
+    """
         Entra no detalhe da pré-análise e salva os dados do editor.
-    '''
+    """
     while elemento_por_texto_em_lista_by_tag(driver, "h3", "Digitar Documento") is None:
         print("Espera Página de Digitar Documento")
         time.sleep(0.5)
@@ -684,5 +695,56 @@ def pagina_4(driver):
         if existe_elemento(driver, '//*[@id="submitButton"]', 'xpath'):
             save_button = acessar_elemento(driver, '//*[@id="submitButton"]', 'xpath')
             save_button.click()
+            
+
+def pagina_5(driver):
+        """"""
+        while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+            print("Espera Página de Arquivos")
+            time.sleep(0.5)
+        
+        if existe_elemento(driver, '//*[@id="finishButton"]', 'xpath'):
+            save_and_conclude_button =  acessar_elemento(driver, '//*[@id="finishButton"]', 'xpath')
+            save_and_conclude_button.click()
+
+            while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+                print("Espera Página de Arquivos")
+                time.sleep(0.5)
+
+            if existe_elemento(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath'):
+                alter_button = acessar_elemento(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath')
+                alter_button.click()
+
+            time.sleep(1)
+            
+
+def pagina_6(driver):
+    if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath'):
+        warrant_classification = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath')
+        warrant_classification.click()
+
+        if existe_elemento(driver, '//*[@id="codCustasMandado"]', 'xpath'):
+            warrant_cost_select = acessar_elemento(driver, '//*[@id="codCustasMandado"]', 'xpath') # Citação, intimação e notificação
+            warrant_cost_select.send_keys('c')
+            
+        if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[12]/td[2]/label[2]/input', 'xpath'):
+            linked_fullfilment = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[12]/td[2]/label[2]/input', 'xpath') 
+            linked_fullfilment.click()
+            
+        if existe_elemento(driver, '//*[@id="rowAssinadoPorJuiz"]/td[2]/label[2]/input', 'xpath'):
+            digitaly_signed_by_judge = acessar_elemento(driver, '//*[@id="rowAssinadoPorJuiz"]/td[2]/label[2]/input') # não
+            digitaly_signed_by_judge.click()
+            
+        if existe_elemento(driver, '//*[@id="prazoOficialJustica"]', 'path'):
+            probation_officer_term = acessar_elemento(driver, '//*[@id="prazoOficialJustica"]')
+            for i in range(10): 
+                probation_officer_term.send_keys(Keys.BACK_SPACE)
+            probation_officer_term.send_keys('15')
+
+            time.sleep(0.5)
+
+            if existe_elemento(driver, '//*[@id="saveButton"]', 'path'):
+                save_button = acessar_elemento(driver, '//*[@id="saveButton"]', 'path')
+                save_button.click()
     
             
