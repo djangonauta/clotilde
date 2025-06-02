@@ -666,6 +666,9 @@ def pagina_3(driver):
     
 
 def pagina_4(driver):
+    '''
+        Entra no detalhe da pré-análise e salva os dados do editor.
+    '''
     while elemento_por_texto_em_lista_by_tag(driver, "h3", "Digitar Documento") is None:
         print("Espera Página de Digitar Documento")
         time.sleep(0.5)
