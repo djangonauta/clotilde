@@ -148,6 +148,7 @@ def configurar_driver():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-plugins-discovery")
+    options.add_argument("--start-maximized")
     
     return webdriver.Chrome(
             service=Service(os.path.expanduser('~/chromedriver')),
@@ -157,6 +158,8 @@ def configurar_driver():
     
 def loginSeeu(id_automacao):
     driver = configurar_driver()
+    driver.set_page_load_timeout(60)
+    driver.implicitly_wait(15)
     driver.get('https://seeuintegra.pje.jus.br/seeu/')
     
     try:
@@ -246,7 +249,7 @@ def existe_id(driver, id_element, timout=10):
         return False
     
 
-def existe_elemento(driver, locator_value, locator_type="id", timeout=10):
+def existe_elemento(driver, locator_value, locator_type="id", timeout=15):
     locator_map = {
         'id': By.ID,
         'class': By.CLASS_NAME,
@@ -274,7 +277,7 @@ def existe_elemento(driver, locator_value, locator_type="id", timeout=10):
         return False
     
     
-def acessar_elemento(driver, locator_value, locator_type="id", timout=10):
+def acessar_elemento(driver, locator_value, locator_type="id", timout=15):
     locator_map = {
         'id': By.ID,
         'class': By.CLASS_NAME,
@@ -292,7 +295,7 @@ def acessar_elemento(driver, locator_value, locator_type="id", timout=10):
     return elemento
     
     
-def acessar_elementos(driver, locator_value, locator_type="id", timout=10) -> list:
+def acessar_elementos(driver, locator_value, locator_type="id", timout=15) -> list:
     locator_map = {
         'id': By.ID,
         'class': By.CLASS_NAME,
@@ -366,9 +369,28 @@ def continua_seeu_apos_login(driver):
                     
                     try:
                         pagina_6(driver)
+                        logger.info(f'Finalizou pagina_6')
                     except Exception as e:
                         pass
-            
+                    
+                    try:
+                        pagina_7(driver)
+                        logger.info(f'Finalizou pagina_7')
+                    except Exception as e:
+                        pass
+                    
+                    try:
+                        pagina_8(driver)
+                        logger.info(f'Finalizou pagina_8')
+                    except Exception as e:
+                        pass
+                    
+                    try:
+                        pagina_9(driver)
+                        logger.info(f'Finalizou pagina_9')
+                    except Exception as e:
+                        pass
+
             
     except Exception as e:
         logger.error(e)
@@ -479,7 +501,9 @@ def pagina_1(driver): #l:50 (pagina_1)
         user_main_frame =  acessar_elemento(driver, locator_value, locator_type)
         driver.switch_to.frame(user_main_frame)
         
+        logger.info('pagina_1: localizando o container')
         if existe_elemento(driver, 'container'):
+            logger.info('pagina_1: container')
             container = acessar_elemento(driver, 'container')
             # driver.switch_to.frame(container)
             
@@ -727,24 +751,226 @@ def pagina_6(driver):
             warrant_cost_select = acessar_elemento(driver, '//*[@id="codCustasMandado"]', 'xpath') # Citação, intimação e notificação
             warrant_cost_select.send_keys('c')
             
+        if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[6]/td[2]/label[1]/input', 'xpath'):
+            parte_processo = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[6]/td[2]/label[1]/input', 'xpath')
+            parte_processo.click()
+        
         if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[12]/td[2]/label[2]/input', 'xpath'):
             linked_fullfilment = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[12]/td[2]/label[2]/input', 'xpath') 
             linked_fullfilment.click()
             
         if existe_elemento(driver, '//*[@id="rowAssinadoPorJuiz"]/td[2]/label[2]/input', 'xpath'):
-            digitaly_signed_by_judge = acessar_elemento(driver, '//*[@id="rowAssinadoPorJuiz"]/td[2]/label[2]/input') # não
+            digitaly_signed_by_judge = acessar_elemento(driver, '//*[@id="rowAssinadoPorJuiz"]/td[2]/label[2]/input', 'xpath') # não
             digitaly_signed_by_judge.click()
             
-        if existe_elemento(driver, '//*[@id="prazoOficialJustica"]', 'path'):
-            probation_officer_term = acessar_elemento(driver, '//*[@id="prazoOficialJustica"]')
+        
+        logger.info(f'Acessando id: prazoOficialJustica')
+        if existe_elemento(driver, '//*[@id="prazoOficialJustica"]', 'xpath'):
+            probation_officer_term = acessar_elemento(driver, '//*[@id="prazoOficialJustica"]', 'xpath')
             for i in range(10): 
                 probation_officer_term.send_keys(Keys.BACK_SPACE)
             probation_officer_term.send_keys('15')
 
             time.sleep(0.5)
 
-            if existe_elemento(driver, '//*[@id="saveButton"]', 'path'):
-                save_button = acessar_elemento(driver, '//*[@id="saveButton"]', 'path')
+            if existe_elemento(driver, '//*[@id="saveButton"]', 'xpath'):
+                save_button = acessar_elemento(driver, '//*[@id="saveButton"]', 'xpath')
                 save_button.click()
+                
+                
+def pagina_7(driver): # l: 702 (TaskIntimarPessoalmente_SEEU_011)
+    while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+        logger.info("Espera Página de Arquivos")
+        time.sleep(0.5)
+
+    if existe_elemento(driver, '//input[@id="editButton" and @value="Adicionar"]', 'xpath'):
+        add_button = acessar_elemento(driver, '//input[@id="editButton" and @value="Adicionar"]', 'xpath')
+        add_button.click()
+
+        time.sleep(2)
     
+    
+def pagina_8(driver):
+    if existe_elemento(driver, '//iframe[@frameborder="0"]', 'xpath', timeout=60):
+        pop_up_frame = acessar_elemento(driver, '//iframe[@frameborder="0"]', 'xpath')
+        pop_up_name = pop_up_frame.get_attribute('name')
+        pop_up_name = "_".join(pop_up_name.split("_")[:-1])
+
+        driver.switch_to.frame(pop_up_frame)
+        
+        if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath'):
+            table = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath')
+            
+            if existe_elemento(table, 'tr', 'tag'):            
+                trs = acessar_elementos(table, 'tr', 'tag')
+        
+                funcionou, opcao, indice = selecionar_anexo(trs)
+
+                if funcionou:
+                    if existe_elemento(trs[indice+2], 'input', 'tag'):
+                        input_check = acessar_elementos(trs[indice+2], 'input', 'tag')                            
+                        input_check[0].click() 
+                        time.sleep(0.5)
+                        
+                        if existe_elemento(driver, '//*[@id="selectButton"]', 'xpath'):
+                            select = acessar_elemento(driver, '//*[@id="selectButton"]', 'xpath')
+                            select.click()
+                else:
+                    mensagem = "Não foi possível encontrar checkbox de um documento válido. Realize o procedimento adequado para esse caso."
+                    logger.info("Não foi possível encontrar checkbox de um documento válido. Aguardando o usuário realizar procedimento adequado.")
+                    logger.warning(mensagem)
+                while elemento_por_texto_em_lista_by_tag(driver, "h3", "Seleção de Documentos") is not None:
+                    logger.info("Espera Sair de Seleção de Documentos")
+                    time.sleep(0.5)
+
+                return opcao
+            
+def pagina_9(driver):
+    if existe_elemento(driver, '//*[@name="mainFrame"]', 'xpath'):
+        user_main_frame = acessar_elemento(driver, '//*[@name="mainFrame"]', 'xpath')  # '/html/body/div[2]/iframe'
+        driver.switch_to.frame(user_main_frame)
+
+        if existe_elemento(driver, '//*[@name="userMainFrame"]', 'xpath'):
+            user_main_frame = acessar_elemento(driver, '//*[@name="userMainFrame"]', 'xpath')  # '/html/body/div[2]/iframe'
+            driver.switch_to.frame(user_main_frame)
+
+            while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+                print("Espera Página de Arquivos")
+                time.sleep(0.5)
+
+            time.sleep(1)
+
+            if existe_elemento(driver, '//*[@id="postergarButton" and @value="Postergar Assinatura"]', 'xpath'):
+                sing_and_ship_button = acessar_elemento(driver, '//*[@id="postergarButton" and @value="Postergar Assinatura"]', 'xpath')
+                sing_and_ship_button.click()
+
+            
+            
+def selecionar_anexo(trs):
+    despachos = ["Assistência Judiciária Gratuita",
+                    "Conflito de Competência", 
+                    "Exceção da Verdade", 
+                    "Exceção de Incompetência, suspeição ou Impedimento",
+                    "Incidente de Insanidade Mental", 
+                    "Expedição de alvará de levantamento",
+                    "Julgamento em Diligência",
+                    "Mero expediente",
+                    "Ordenação de entrega de autos",
+                    "Requisição de Informações"]
+    
+    decisoes = ["A depender do julgamento de outra causa, de outro juízo ou declaração incidente",
+                "Força maior",
+                "Livramento Condicional", 
+                "Morte ou perda da capacidade", 
+                "Por decisão judicial", 
+                "Réu revel citado por edital", 
+                "Suspensão Condicional do Processo",
+                "Antecipação de tutela", 
+                "Comutação da pena", 
+                "Detração/Remição da Pena", 
+                "Direito de visita", 
+                "Indulto", 
+                "Liberdade provisória", 
+                "Liminar", 
+                "Livramento Condicional", 
+                "Medida protetiva", 
+                "Permissão de saída", 
+                "Prisão Domiciliar", 
+                "Progressão de regime", 
+                "Suspensão Condicional da Pena",
+                "Arquivamento", 
+                "Bloqueio/penhora on line", 
+                "Demonstração de existência de repercussão geral e manifestação sobre a questão constitucional", 
+                "Determinação de arquivamento de procedimentos investigatórios", 
+                "Devolução da carta rogatória ao juízo rogante", 
+                "Devolução dos autos à origem", 
+                "Distribuição", 
+                "Juízo provisório para medidas urgentes", 
+                "Quebra de sigilo bancário", 
+                "Quebra de sigilo fiscal", 
+                "Quebra de sigilo telemático",
+                "Regressão de Medida Sócio-Educativa",
+                "Regressão de Regime",
+                "Assistência judiciária gratuita", 
+                "Liberdade Provisória", 
+                "Liminar", 
+                "Medida protetiva",
+                "Assistência Judiciária Gratuita", 
+                "Decisão anterior", 
+                "Detração/Remição", 
+                "Liminar", 
+                "Livramento Condicional", 
+                "Medida protetiva", 
+                "Medida protetiva determinada por autoridade policia", 
+                "Prisão", 
+                "Revogação da Suspensão do Processo", 
+                "Suspensão Condicional da Pena", 
+                "Cancelamento da distribuição",
+                "Com efeito suspensivo", 
+                "Sem efeito suspensivo", 
+                "Decisão de Saneamento e de Organização", 
+                "Decisão Interlocutória de Mérito", 
+                "deferimento",
+                "Denúncia", 
+                "Exceção de Impedimento ou Suspeição", 
+                "Exceção de incompetência",
+                "Desistência de Recurso", 
+                "Medida protetiva determinada por autoridade policial", 
+                "Domiciliar", 
+                "Embargos", 
+                "Reclamação", 
+                "Impedimento", 
+                "Incompetência", 
+                "Remição", 
+                "Suspeição", 
+                "Impedimento ou Suspeição", 
+                "Incompetência",  
+                "Inclusão em Regime Disciplinar Diferenciado", 
+                "pagamento", 
+                "Recambiamento de Preso", 
+                "Saída Temporária", 
+                "Trabalho Externo", 
+                "Transferência da Execução da Pena", 
+                "Transferência para outro Estabelecimento Penal", 
+                "Indeferimento", 
+                "Liminar", 
+                "Medida protetiva", 
+                "Liminar Prejudicada", 
+                "Outras Decisões", 
+                "Pena / Medida", 
+                "Preventiva", 
+                "Temporária", 
+                "Prorrogação de cumprimento de pena/medida de segurança", 
+                "Provisória",
+                "Recurso", "Reforma de decisão anterior", 
+                "Relaxamento do Flagrante", 
+                "Suscitação de Conflito de Competência", 
+                "Unificação e Soma de Penas",
+                "Unificadas e Somadas as Penas"]
+    
+    despachos = [x.upper() for x in despachos]
+    decisoes = [x.upper() for x in decisoes]
+
+    funcionou = False
+    opcao = None
+    indice = 0
+    for indice, tr in enumerate(trs):
+        tag_b = tr.find_elements(by=By.TAG_NAME, value="b")
+        if len(tag_b)>0:
+            tag_b = tag_b[0]
+            for despacho in despachos:
+                if despacho in tag_b.text.upper():
+                    funcionou = True
+                    opcao = despacho
+                    # if get_elements_by_tag(trs[indice+2], "input") is not None:
+                    if existe_elemento(trs[indice+2], 'input', 'tag'):
+                        return funcionou, "Despacho: "+opcao, indice
+            for decisao in decisoes:
+                if decisao in tag_b.text.upper():
+                    funcionou = True    
+                    opcao = decisao
+                    # if get_elements_by_tag(trs[indice+2], "input") is not None:
+                    if existe_elemento(trs[indice+2], 'input', 'tag'):
+                        return funcionou, "Decisão: "+opcao, indice
+    return funcionou, "Não Encontrado", indice
             
