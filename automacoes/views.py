@@ -826,6 +826,8 @@ def pagina_8(driver):
                 return opcao
             
 def pagina_9(driver):
+    driver.switch_to.default_content() #;:339 (TaskIntimarPessoalmente_SEEU_011.py)
+    
     if existe_elemento(driver, '//*[@name="mainFrame"]', 'xpath'):
         user_main_frame = acessar_elemento(driver, '//*[@name="mainFrame"]', 'xpath')  # '/html/body/div[2]/iframe'
         driver.switch_to.frame(user_main_frame)
