@@ -17,6 +17,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
+from automacoes.utils import acessar_elemento_visivel, acessar_elemento_clicavel, acessar_elementos_visiveis
 
 import utils
 import time
@@ -27,6 +28,9 @@ from . import models
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
+
+corporativo_cpf = os.getenv('CORPORATIVO_SEEU')
+corporativo_pass = os.getenv('CORPORATIVO_PASS')
 
 
 # def verificar(request, id_automacao):
@@ -193,8 +197,8 @@ def loginSeeu(id_automacao):
                 
                 driver.switch_to.window(str(nova_aba))
                 
-                driver.find_element(By.ID, "username").send_keys('89858948204')
-                driver.find_element(By.ID, "password").send_keys('Ro5291204.,')
+                driver.find_element(By.ID, "username").send_keys(corporativo_cpf)
+                driver.find_element(By.ID, "password").send_keys(corporativo_pass)
                 driver.find_element(By.ID, "kc-login").click()
                 
                 time.sleep(0.5)
@@ -494,34 +498,18 @@ def acessar_vara(driver, elementos):
                     
        
 def pagina_1(driver): #l:50 (pagina_1)
-    locator_value = '//*[@name="userMainFrame"]'
-    locator_type = 'xpath'
+    el_user_main_frame = acessar_elemento_visivel(driver, '//*[@name="userMainFrame"]', 'xpath')
+    driver.switch_to.frame(el_user_main_frame)
     
-    if existe_elemento(driver, locator_value, locator_type):
-        user_main_frame =  acessar_elemento(driver, locator_value, locator_type)
-        driver.switch_to.frame(user_main_frame)
-        
-        logger.info('pagina_1: localizando o container')
-        if existe_elemento(driver, 'container'):
-            logger.info('pagina_1: container')
-            container = acessar_elemento(driver, 'container')
-            # driver.switch_to.frame(container)
-            
-            if existe_elemento(container, 'content'):
-                content = acessar_elemento(driver, 'content')
-                # driver.switch_to.frame(content)
-                
-                if existe_elemento(content, 'mesaAnalistaForm'):
-                    form = acessar_elemento(driver, 'mesaAnalistaForm')
-                    # driver.switch_to.frame(form)
-        
-                    while elemento_por_texto_em_lista_by_tag(form, 'h3', 'Mesa do(a) Analista Judiciário') is None:
-                        logger.info('Espera Página de Mesa do Analista Judiciário')
-                        time.sleep(0.5)
-                        
-                    # ACESSA ABA OUTROS CUMPRIMENTOS
-                    return acessar_aba_outros_cumprimentos(driver)
-        
+    el_container = acessar_elemento_visivel(driver, 'container', timeout=60)
+    el_content = acessar_elemento_visivel(el_container, 'content', timeout=60)
+    mesa_analista_form = acessar_elemento_visivel(el_content, 'mesaAnalistaForm', timeout=60)
+    
+    while elemento_por_texto_em_lista_by_tag(mesa_analista_form, 'h3', 'Mesa do(a) Analista Judiciário') is None:
+        logger.info('Espera Página de Mesa do Analista Judiciário')
+        time.sleep(0.5)
+    
+    return acessar_aba_outros_cumprimentos(driver)
             
 
 def acessar_aba_outros_cumprimentos(driver):
@@ -529,38 +517,29 @@ def acessar_aba_outros_cumprimentos(driver):
         Método pagina_1: robo clóvis
         Acessa a aba outros cumprimentos, procura pelo cumprimento Madado e se existir clica no link da coluna para expedir (número de mandados)
     """
-    locator_value = '//*[@name="tabOutrosCumprimentos"]'
-    locator_type = 'xpath'
+    acessar_elemento_clicavel(driver, '//*[@name="tabOutrosCumprimentos"]', 'xpath').click()
+        
+    tabela = buscar_tabela_por_texto(driver, 'Para Expedir', nao_incluso='Outros Cumprimentos') 
+    tr = elemento_por_texto_em_lista_by_tag(tabela, 'tr', 'Mandado') #l:66 (TaskIntimarPessoalmente_SEEU_011.py)
     
-    if existe_elemento(driver, locator_value, locator_type):
-        tab_outros_cumprimentos = acessar_elemento(driver, locator_value, locator_type)
-        tab_outros_cumprimentos.click()
+    tds = acessar_elementos_visiveis(tr, 'td', 'tag')
+    if tds:
+        colunas = {
+            'para_expedir': 2,
+            'para_assinar': 3,
+            'com_urgencia': 4,
+            'devolvido_pelo_juiz': 5,
+            'decurso_de_prazo': 6 
+        }
         
-        tabela = buscar_tabela_por_texto(driver, 'Para Expedir', nao_incluso='Outros Cumprimentos') 
-        linha_tabela = elemento_por_texto_em_lista_by_tag(tabela, 'tr', 'Mandado') #l:66 (TaskIntimarPessoalmente_SEEU_011.py)
+        driver = tds[colunas['para_expedir']]
         
-        locator_value = 'td'
-        locator_type = 'tag'
-        if existe_elemento(linha_tabela, locator_value, locator_type):
-            colunas = {
-                'para_expedir': 2,
-                'para_assinar': 3,
-                'com_urgencia': 4,
-                'devolvido_pelo_juiz': 5,
-                'decurso_de_prazo': 6 
-            }
-            dados_tabela = acessar_elementos(linha_tabela, locator_value, locator_type) #l:67 (TaskIntimarPessoalmente_SEEU_011.py)
-            
-            driver = dados_tabela[colunas['para_expedir']]
-            locator_value = 'a'
-            locator_type = 'tag'
-            if existe_elemento(driver, locator_value, locator_type):
-                tag_a = acessar_elementos(driver, locator_value, locator_type)
-                tag_a_link = tag_a[0] #l:69 (TaskIntimarPessoalmente_SEEU_011.py)
-                quantidade_madados = int(tag_a_link.text)
-                if quantidade_madados > 0:
-                    tag_a_link.click() #l:72 (TaskIntimarPessoalmente_SEEU_011.py)
-                return quantidade_madados
+        el_tag_a = acessar_elemento_clicavel(driver, 'a', 'tag', timeout=15)
+        quantidade_madados = int(el_tag_a.text)
+        
+        if quantidade_madados > 0:
+            el_tag_a.click() #l:72 (TaskIntimarPessoalmente_SEEU_011.py)
+        return quantidade_madados
                 
                 
  
@@ -575,11 +554,10 @@ def buscar_tabela_por_texto(driver, texto, id=False, repete=False, completo=Fals
         identificacao_erros(driver)
         controlar_tempo_espera(300)
         repete_interno = repete
-        # tabelas = driver.find_elements(by=By.TAG_NAME, value='table')
-        locator_value = 'table'
-        locator_type = 'tag'
-        if existe_elemento(driver, locator_value, locator_type):
-            tabelas = acessar_elementos(driver, locator_value, locator_type)
+        
+        tabelas = acessar_elementos_visiveis(driver, 'table', 'tag')
+        
+        if tabelas:
             for index, tabela in enumerate(tabelas):
                 if "Traceback (most recent call last)" not in tabela.text:
                     continua = True
@@ -639,9 +617,8 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
     repete_interno = True
     while repete_interno:
         repete_interno = repete
-        # elementos = driver.find_elements(by=By.TAG_NAME, value=tag)
-        if existe_elemento(driver, tag, 'tag'):
-            elementos = acessar_elementos(driver, tag, 'tag')
+        elementos = acessar_elementos_visiveis(driver, tag, 'tag')
+        if elementos:
             for elemento in elementos:
                 continua = True
                 if nao_incluso is not None: 
@@ -664,12 +641,11 @@ def pagina_2(driver):
         print("Espera Página de Mandados")
         time.sleep(0.5)
 
-    table = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath', 20) #l82: (TaskIntimarPessoalmente_SEEU_011.py) 
-    tr = table.find_elements(by=By.TAG_NAME, value="tr")
-    td = tr[0].find_elements(by=By.TAG_NAME, value="td")
-    processo = td[5].text 
-    td[15].find_elements(by=By.TAG_NAME, value="td")[1].click() # //*[@id="cumprimentoCartorioMandadoForm"]/table[4]/tbody/tr[1]/td[16]/table/tbody/tr/td[2]
-    time.sleep(1.5)
+    el_table = acessar_elemento_visivel(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath') #l82: (TaskIntimarPessoalmente_SEEU_011.py) 
+    el_tr = acessar_elemento_visivel(el_table, 'tr', 'tag')
+    el_td = acessar_elementos_visiveis(el_tr, 'td', 'tag')
+    processo = el_td[5].text 
+    el_td[15].find_elements(by=By.TAG_NAME, value="td")[1].click() # //*[@id="cumprimentoCartorioMandadoForm"]/table[4]/tbody/tr[1]/td[16]/table/tbody/tr/td[2]
     return processo   
             
             
@@ -678,21 +654,19 @@ def pagina_3(driver):
         Acessa a página de Pré-Análise, preenche as informações Tipo do Arquivo, Modelo e clica no botão "Digitar Texto"
     """
     while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
-            print("Espera Página de Arquivos")
-            time.sleep(0.5)
+        print("Espera Página de Arquivos")
+        time.sleep(0.5)
 
-    file_type_select = acessar_elemento(driver, '//*[@id="descricaoTipoArquivo"]', 'xpath')
-    file_type_select.send_keys('Mandado')
-    type_opcao = acessar_elemento(driver, '//*[@id="101"]', 'xpath')
-    type_opcao.click()
+    acessar_elemento_visivel(driver, '//*[@id="descricaoTipoArquivo"]', 'xpath').send_keys('Mandado')
+    acessar_elemento_clicavel(driver, '//*[@id="101"]', 'xpath').click()
     
-    file_type_model = acessar_elemento(driver, '//*[@id="descricaoModelo"]', 'xpath')
     modelo = "(Deusilene dos Santos Souza - Analista Judiciário ) - MANDADO - LIVRAMENTO CONDICIOANL" #l:21 (config.xml)
     modelo_split = modelo.split(") - ")[-1]
-    file_type_model.send_keys(modelo_split)
-    time.sleep(1.5)
-    type_model = driver.find_element(By.XPATH, "//li[contains(text(), '"+modelo_split+"')]")
-    type_model.click()
+    
+    acessar_elemento_clicavel(driver, '//*[@id="descricaoModelo"]', 'xpath').send_keys(modelo_split)
+    # type_model = driver.find_element(By.XPATH, "//li[contains(text(), '"+modelo_split+"')]")
+    # type_model.click()
+    acessar_elemento_clicavel(driver, "//li[contains(text(), '"+modelo_split+"')]", 'xpath').click()
     
     print("Clique no Digitar Texto")
     type_text = acessar_elemento(driver, '//*[@id="digitarButton"]', 'xpath')
