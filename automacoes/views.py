@@ -321,68 +321,68 @@ def acessar_elementos(driver, locator_value, locator_type="id", timout=15) -> li
 def continua_seeu_apos_login(driver):
     try:
         iframe = acessar_elemento_visivel(driver, 'mainFrame')
-        if iframe:
-            driver.switch_to.frame(iframe)
-            driver = acessar_lista_atuacao(driver) #l:619 (method: automacao) (TaskIntimarPessoalmente_SEEU_11)
-            
-            if not driver:
-                raise Exception('Falha ao mudar de vara')
-            
-            logger.info('Acessou a mesa do analista') #l:628
-            
-            continuacao = True
-            while continuacao:
-                continuacao = False
-                # PÁGINA 1
-                quantidade = pagina_1(driver)
-                if quantidade > 0:
-                    quantidade = True
-                    logger.info(f'Finalizou Página 1 com quantidade {quantidade}')
-                    processo = pagina_2(driver)
-                    logger.info(f'Finalizou pagina_2, processo: {processo}')
-                    # TODO Aqui entraria a parte do log e geração de arquivo em excell
-                    try:
-                        pagina_3(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
-                    except Exception as e:
-                        # TODO Caso ocorra excessão enviar error para o log.
-                        pass
-                        
-                    try:
-                        pagina_4(driver)
-                        logger.info(f'Finalizou pagina_4')
-                    except Exception as e:
-                        # TODO Caso ocorra excessão enviar error para o log.
-                        pass
+        # if iframe:
+        driver.switch_to.frame(iframe)
+        driver = acessar_lista_atuacao(driver) #l:619 (method: automacao) (TaskIntimarPessoalmente_SEEU_11)
+        
+        if not driver:
+            raise Exception('Falha ao mudar de vara')
+        
+        logger.info('Acessou a mesa do analista') #l:628
+        
+        continuacao = True
+        while continuacao:
+            continuacao = False
+            # PÁGINA 1
+            quantidade = pagina_1(driver)
+            if quantidade > 0:
+                quantidade = True
+                logger.info(f'Finalizou Página 1 com quantidade {quantidade}')
+                processo = pagina_2(driver)
+                logger.info(f'Finalizou pagina_2, processo: {processo}')
+                # TODO Aqui entraria a parte do log e geração de arquivo em excell
+                try:
+                    pagina_3(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
+                except Exception as e:
+                    # TODO Caso ocorra excessão enviar error para o log.
+                    pass
                     
-                    try:
-                        pagina_5(driver)
-                        logger.info(f'Finalizou pagina_5')
-                    except Exception as e:
-                        pass
-                    
-                    try:
-                        pagina_6(driver)
-                        logger.info(f'Finalizou pagina_6')
-                    except Exception as e:
-                        pass
-                    
-                    try:
-                        pagina_7(driver)
-                        logger.info(f'Finalizou pagina_7')
-                    except Exception as e:
-                        pass
-                    
-                    try:
-                        pagina_8(driver)
-                        logger.info(f'Finalizou pagina_8')
-                    except Exception as e:
-                        pass
-                    
-                    try:
-                        pagina_9(driver)
-                        logger.info(f'Finalizou pagina_9')
-                    except Exception as e:
-                        pass
+                try:
+                    pagina_4(driver)
+                    logger.info(f'Finalizou pagina_4')
+                except Exception as e:
+                    # TODO Caso ocorra excessão enviar error para o log.
+                    pass
+                
+                try:
+                    pagina_5(driver)
+                    logger.info(f'Finalizou pagina_5')
+                except Exception as e:
+                    pass
+                
+                try:
+                    pagina_6(driver)
+                    logger.info(f'Finalizou pagina_6')
+                except Exception as e:
+                    pass
+                
+                try:
+                    pagina_7(driver)
+                    logger.info(f'Finalizou pagina_7')
+                except Exception as e:
+                    pass
+                
+                try:
+                    pagina_8(driver)
+                    logger.info(f'Finalizou pagina_8')
+                except Exception as e:
+                    pass
+                
+                try:
+                    pagina_9(driver)
+                    logger.info(f'Finalizou pagina_9')
+                except Exception as e:
+                    pass
 
             
     except Exception as e:
@@ -412,10 +412,11 @@ def selecionar_perfil_seeu(driver):
         
 def acessar_lista_atuacao(driver): #l:526 (ExecuteAlteraVara - TaskIntimarPessoalmente_SEEU_011)
     locator_value = 'listaAreavara'
-    if existe_elemento(driver, locator_value):
+    el_lista_area_vara = acessar_elemento_visivel(driver, locator_value)
+    
+    if el_lista_area_vara:
         locator_value = f"#{locator_value} li"
-        locator_type = 'css'
-        elementos = acessar_elementos(driver, locator_value, locator_type)
+        elementos = acessar_elementos_visiveis(driver, locator_value, 'css')
         result = acessar_vara(driver, elementos) # l:528 (TaskIntimarPessoalmente_SEEU_011.PY)
         
         if not result:
@@ -426,12 +427,14 @@ def acessar_lista_atuacao(driver): #l:526 (ExecuteAlteraVara - TaskIntimarPessoa
         
         return driver
  
+ 
 def filtrar_por_varas_excecucoes_penais(nome_vara):
     paradrao_explicito =  r'\b(Execução|Execuções|Penal|Penais)\b'
     
     return re.findall(paradrao_explicito, nome_vara, re.IGNORECASE)       
 
-def acessar_vara(driver, elementos):
+
+def acessar_vara(driver, elementos): #TODO refatorar
     locator_value = 'a'
     locator_type = 'tag'
     for elemento in elementos:
