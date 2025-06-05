@@ -167,22 +167,13 @@ def loginSeeu(id_automacao):
     driver.get('https://seeuintegra.pje.jus.br/seeu/')
     
     try:
-        iframe = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, 'mainFrame'))
-        )
-        
+        iframe = acessar_elemento_visivel(driver, 'mainFrame')
         driver.switch_to.frame(iframe)
         
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a#btn-login-corporativo')))
-        # driver.find_element(By.ID, "btn-login-senha-toogle").click()
-        # driver.find_element(By.ID, "login").send_keys('rodrigo.resque')
-        # driver.find_element(By.ID, "senha").send_keys('123456')
-        # driver.find_element(By.ID, 'login-form').find_element(By.ID, 'btEntrar').click()
-
         janela_original = driver.current_window_handle
-        driver.find_element(By.ID, "btn-login-corporativo").click()
+        acessar_elemento_clicavel(driver, "btn-login-corporativo").click()
         
-        corporaivo = WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
+        corporaivo = WebDriverWait(driver, 60).until(EC.number_of_windows_to_be(2))
         if corporaivo:
             todas_janelas = driver.window_handles
             novas_abas = [ janela for janela in todas_janelas if janela != janela_original]
@@ -197,13 +188,13 @@ def loginSeeu(id_automacao):
                 
                 driver.switch_to.window(str(nova_aba))
                 
-                driver.find_element(By.ID, "username").send_keys(corporativo_cpf)
-                driver.find_element(By.ID, "password").send_keys(corporativo_pass)
-                driver.find_element(By.ID, "kc-login").click()
+                acessar_elemento_visivel(driver, 'username').send_keys(corporativo_cpf)
+                acessar_elemento_visivel(driver, 'password').send_keys(corporativo_pass)
+                acessar_elemento_clicavel(driver, 'kc-login').click()
                 
                 time.sleep(0.5)
                 
-                janela_atual_seeu = driver.current_window_handle
+                janela_atual_seeu = driver.switch_to.window(janela_original)
                 todas_janelas_atualis = driver.window_handles
                 novas_abas_atuais = [ janela_atual for janela_atual in todas_janelas_atualis if janela_atual != janela_atual_seeu]
                 
@@ -329,11 +320,9 @@ def acessar_elementos(driver, locator_value, locator_type="id", timout=15) -> li
   
 def continua_seeu_apos_login(driver):
     try:
-        logging.info(driver)
-        if existe_elemento(driver, 'mainFrame'):
-            iframe = acessar_elemento(driver, 'mainFrame')        
+        iframe = acessar_elemento_visivel(driver, 'mainFrame')
+        if iframe:
             driver.switch_to.frame(iframe)
-            
             driver = acessar_lista_atuacao(driver) #l:619 (method: automacao) (TaskIntimarPessoalmente_SEEU_11)
             
             if not driver:
