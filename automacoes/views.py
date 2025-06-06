@@ -664,7 +664,7 @@ def acessar_tab_pre_analise_e_preencher_campos(driver):
     print("Fim clique no Digitar Texto")
     
 
-def acessar_editor_documento_salvar_dados(driver):
+def acessar_editor_documento_salvar_dados(driver): #TODO refatora condicionais
     """
         Entra no detalhe da pré-análise e salva os dados do editor.
     """
@@ -697,7 +697,7 @@ def acessar_tela_arquivo(driver):
     time.sleep(1)
             
 
-def acessar_processo_e_preenchar_dados(driver):
+def acessar_processo_e_preenchar_dados(driver): #TODO refatora condicionais
     if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath'):
         warrant_classification = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath')
         warrant_classification.click()
