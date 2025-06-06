@@ -320,6 +320,7 @@ def acessar_elementos(driver, locator_value, locator_type="id", timout=15) -> li
   
 def continua_seeu_apos_login(driver):
     try:
+
         iframe = acessar_elemento_visivel(driver, 'mainFrame')
         # if iframe:
         driver.switch_to.frame(iframe)
@@ -434,67 +435,64 @@ def filtrar_por_varas_excecucoes_penais(nome_vara):
     return re.findall(paradrao_explicito, nome_vara, re.IGNORECASE)       
 
 
-def acessar_vara(driver, elementos): #TODO refatorar
-    locator_value = 'a'
-    locator_type = 'tag'
+def acessar_vara(driver, elementos): 
     for elemento in elementos:
-        if existe_elemento(elemento, locator_value, locator_type):
-            logger.info(f'Acessando a vara: {debug_elemento(elemento)}')
-            acessar_elemento(elemento, locator_value, locator_type).click()
-            driver.switch_to.default_content()
-            locator_value = 'mainFrame'
-            if existe_elemento(driver, locator_value):
-                main_frame = acessar_elemento(driver, locator_value)
-                driver.switch_to.frame(main_frame)
+        acessar_elemento_clicavel(elemento, 'a', 'tag').click()
+        logger.info(f'Acessando a vara: {debug_elemento(elemento)}')
+        
+        driver.switch_to.default_content()
+        
+        main_frame = acessar_elemento_visivel(driver, 'mainFrame', timeout=60)
+        driver.switch_to.frame(main_frame)
+        logger.info('Recarregar os elementos na tela de varas')
+        
+        # Abre o primeiro shadowroot
+        shadow_host_01 = acessar_elemento_visivel(driver, '#header', 'css', timeout=60)
+        shadow_root_01 = shadow_host_01.shadow_root
+        
+        logger.info('Abre novamente o shadow root')
+        
+        # Elemento de texto começa a partir do terceiro filho
+        count = 3
+        
+        try:
+            while True:
+                # Localiza a vara a ser trocada
+                select_result = shadow_root_01.find_element(By.CSS_SELECTOR,
+                    'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text
                 
-                logger.info('Recarregar os elementos na tela de varas')
-                
-                time.sleep(0.5)
-                
-                # Abre o primeiro shadowroot
-                shadow_host_01 = driver.find_element(By.CSS_SELECTOR, '#header')
-                shadow_root_01 = shadow_host_01.shadow_root
-                
-                logger.info('Abre novamente o shadow root')
-                
-                # Elemento de texto começa a partir do terceiro filho
-                count = 3
-                
-                try:
-                    while True:
-                        # Localiza a vara a ser trocada
-                        select_result = shadow_root_01.find_element(By.CSS_SELECTOR,
-                            'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text
+                nome_vara = str(select_result).strip()
+                if nome_vara:
+                    filtro_vara = filtrar_por_varas_excecucoes_penais(nome_vara)
+                    if len(filtro_vara) > 0:
+                        element_in_shadow = shadow_root_01.find_element(By.CSS_SELECTOR,
+                                                'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')')
                         
-                        nome_vara = str(select_result).strip()
-                        if nome_vara:
-                            filtro_vara = filtrar_por_varas_excecucoes_penais(nome_vara)
-                            if len(filtro_vara) > 0:
-                                element_in_shadow = shadow_root_01.find_element(By.CSS_SELECTOR,
-                                                        'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')')
-                                
-                                driver.execute_script("arguments[0].click();", element_in_shadow)
-                                logger.info(f'Nome da Vara: {nome_vara}')
-                                
-                                break
-                            else:
-                                count += 1
-                            
-                except Exception as e:
-                    logger.info(repr(e))
-                    logger.info(f'Não foi possivel localizar a vara informada: {nome_vara}')
-                    
-                    return False
-                
-                return True
+                        driver.execute_script("arguments[0].click();", element_in_shadow)
+                        logger.info(f'Nome da Vara: {nome_vara}')
+                        
+                        break
+                    else:
+                        count += 1
+                        
+        except Exception as e:
+            logger.info(repr(e))
+            logger.info(f'Não foi possivel localizar a vara informada: {nome_vara}')
+            
+            return False
+        
+        return True
                     
        
 def pagina_1(driver): #l:50 (pagina_1)
-    el_user_main_frame = acessar_elemento_visivel(driver, '//*[@name="userMainFrame"]', 'xpath')
+    el_body_mail_frame = acessar_elemento_visivel(driver, '/html/body ', 'xpath', timeout=60)
+    el_div_superior_main = acessar_elemento_visivel(el_body_mail_frame, '/html/body/div[3]', 'xpath', timeout=60)
+    el_user_main_frame = acessar_elemento_visivel(el_div_superior_main, '//*[@id="userMainFrame"]', 'xpath', timeout=60)
     driver.switch_to.frame(el_user_main_frame)
+    # time.sleep(0.5)
     
-    el_container = acessar_elemento_visivel(driver, 'container', timeout=60)
-    el_content = acessar_elemento_visivel(el_container, 'content', timeout=60)
+    el_container = acessar_elemento_visivel(driver, 'container', 'id', timeout=60)
+    el_content = acessar_elemento_visivel(el_container, 'content')
     mesa_analista_form = acessar_elemento_visivel(el_content, 'mesaAnalistaForm', timeout=60)
     
     while elemento_por_texto_em_lista_by_tag(mesa_analista_form, 'h3', 'Mesa do(a) Analista Judiciário') is None:
