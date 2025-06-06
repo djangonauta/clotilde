@@ -16,18 +16,18 @@ LOCATOR_MAP = {
 
 def acessar_elemento_visivel(driver, locator_value, locator_type="id", timeout=15):
     try:
-        elemento = WebDriverWait(driver, timeout).until(
+        return WebDriverWait(driver, timeout).until(
             EC.presence_of_element_located((LOCATOR_MAP[locator_type.lower()], locator_value))
         )
-        debug_elemento(elemento)
+        # debug_elemento(elemento)
         
-        return elemento
+        # return elemento
     except TimeoutException:
         raise TimeoutException(f"Elemento não encontrado após {timeout} segundos. "
                              f"Localizador: {locator_type}='{locator_value}'")
         
 
-def acessar_elementos_visiveis(driver, locator_value, locator_type="id", timeout=15):
+def acessar_elementos_visiveis(driver, locator_value, locator_type="id", timeout=60):
     try:
         return WebDriverWait(driver, timeout).until(
             EC.presence_of_all_elements_located((LOCATOR_MAP[locator_type.lower()], locator_value))
@@ -50,6 +50,19 @@ def acessar_elemento_clicavel(driver, locator_value, locator_type="id", timeout=
         return elemento
     except TimeoutException:
         raise TimeoutException(f"Elemento não clicável após {timeout} segundos. "
+                             f"Localizador: {locator_type}='{locator_value}'")
+        
+
+def acessar_elemento_frame(driver, locator_value, locator_type="id", timeout=15):
+    try:
+        elemento = WebDriverWait(driver, timeout).until(
+            EC.visibility_of_element_located((LOCATOR_MAP[locator_type.lower()], locator_value))
+        )
+        debug_elemento(elemento)
+        
+        return elemento
+    except TimeoutException:
+        raise TimeoutException(f"Elemento não encontrado após {timeout} segundos. "
                              f"Localizador: {locator_type}='{locator_value}'")
         
         

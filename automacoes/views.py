@@ -9,6 +9,7 @@ import logging
 from django import http, shortcuts
 from django.conf import settings
 from selenium import webdriver
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -17,7 +18,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
-from automacoes.utils import acessar_elemento_visivel, acessar_elemento_clicavel, acessar_elementos_visiveis
+from automacoes.utils import acessar_elemento_visivel, acessar_elemento_clicavel, acessar_elementos_visiveis, acessar_elemento_frame
 
 import utils
 import time
@@ -334,35 +335,39 @@ def continua_seeu_apos_login(driver):
         continuacao = True
         while continuacao:
             continuacao = False
-            # PÁGINA 1
-            quantidade = pagina_1(driver)
-            if quantidade > 0:
-                quantidade = True
-                logger.info(f'Finalizou Página 1 com quantidade {quantidade}')
-                processo = pagina_2(driver)
+            time.sleep(1.5)
+            quantidade_mandados_expedir = acessar_mesa_analista_tab_inicio(driver)
+            logger.info(f'Quantidade de mandados para expedir: {quantidade_mandados_expedir}')
+            
+            if quantidade_mandados_expedir > 0:
+                logger.info(f'Finalizou Página 1 com quantidade {quantidade_mandados_expedir}')
+                
+                processo = acessar_mandados_pre_analise(driver)
                 logger.info(f'Finalizou pagina_2, processo: {processo}')
+                
                 # TODO Aqui entraria a parte do log e geração de arquivo em excell
+                
                 try:
-                    pagina_3(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
+                    acessar_tab_pre_analise_e_preencher_campos(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
                 except Exception as e:
                     # TODO Caso ocorra excessão enviar error para o log.
                     pass
                     
                 try:
-                    pagina_4(driver)
+                    acessar_editor_documento_salvar_dados(driver)
                     logger.info(f'Finalizou pagina_4')
                 except Exception as e:
                     # TODO Caso ocorra excessão enviar error para o log.
                     pass
                 
                 try:
-                    pagina_5(driver)
+                    acessar_tela_arquivo(driver)
                     logger.info(f'Finalizou pagina_5')
                 except Exception as e:
                     pass
                 
                 try:
-                    pagina_6(driver)
+                    acessar_processo_e_preenchar_dados(driver)
                     logger.info(f'Finalizou pagina_6')
                 except Exception as e:
                     pass
@@ -442,13 +447,11 @@ def acessar_vara(driver, elementos):
         
         driver.switch_to.default_content()
         
-        main_frame = acessar_elemento_visivel(driver, 'mainFrame', timeout=60)
-        driver.switch_to.frame(main_frame)
+        driver.switch_to.frame(acessar_elemento_visivel(driver, 'mainFrame', timeout=60))
         logger.info('Recarregar os elementos na tela de varas')
         
         # Abre o primeiro shadowroot
-        shadow_host_01 = acessar_elemento_visivel(driver, '#header', 'css', timeout=60)
-        shadow_root_01 = shadow_host_01.shadow_root
+        shadow_root_01 = acessar_elemento_visivel(driver, '#header', 'css', timeout=60).shadow_root
         
         logger.info('Abre novamente o shadow root')
         
@@ -458,10 +461,9 @@ def acessar_vara(driver, elementos):
         try:
             while True:
                 # Localiza a vara a ser trocada
-                select_result = shadow_root_01.find_element(By.CSS_SELECTOR,
-                    'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text
                 
-                nome_vara = str(select_result).strip()
+                nome_vara = str(shadow_root_01.find_element(By.CSS_SELECTOR,
+                    'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text).strip()
                 if nome_vara:
                     filtro_vara = filtrar_por_varas_excecucoes_penais(nome_vara)
                     if len(filtro_vara) > 0:
@@ -484,25 +486,21 @@ def acessar_vara(driver, elementos):
         return True
                     
        
-def pagina_1(driver): #l:50 (pagina_1)
-    el_body_mail_frame = acessar_elemento_visivel(driver, '/html/body ', 'xpath', timeout=60)
-    el_div_superior_main = acessar_elemento_visivel(el_body_mail_frame, '/html/body/div[3]', 'xpath', timeout=60)
-    el_user_main_frame = acessar_elemento_visivel(el_div_superior_main, '//*[@id="userMainFrame"]', 'xpath', timeout=60)
-    driver.switch_to.frame(el_user_main_frame)
-    # time.sleep(0.5)
-    
-    el_container = acessar_elemento_visivel(driver, 'container', 'id', timeout=60)
-    el_content = acessar_elemento_visivel(el_container, 'content')
-    mesa_analista_form = acessar_elemento_visivel(el_content, 'mesaAnalistaForm', timeout=60)
+def acessar_mesa_analista_tab_inicio(driver: WebDriver) -> int:  #l:50 (pagina_1)
+    driver.switch_to.frame(acessar_elemento_visivel(driver, 'userMainFrame'))
+
+    el_container = acessar_elemento(driver, 'container', timout=60)
+    el_content = acessar_elemento(el_container, 'content')
+    mesa_analista_form = acessar_elemento(el_content, 'mesaAnalistaForm')
     
     while elemento_por_texto_em_lista_by_tag(mesa_analista_form, 'h3', 'Mesa do(a) Analista Judiciário') is None:
         logger.info('Espera Página de Mesa do Analista Judiciário')
         time.sleep(0.5)
     
-    return acessar_aba_outros_cumprimentos(driver)
+    return acessar_tab_outros_cumprimentos(driver)
             
 
-def acessar_aba_outros_cumprimentos(driver):
+def acessar_tab_outros_cumprimentos(driver) -> int:
     """
         Método pagina_1: robo clóvis
         Acessa a aba outros cumprimentos, procura pelo cumprimento Madado e se existir clica no link da coluna para expedir (número de mandados)
@@ -525,11 +523,13 @@ def acessar_aba_outros_cumprimentos(driver):
         driver = tds[colunas['para_expedir']]
         
         el_tag_a = acessar_elemento_clicavel(driver, 'a', 'tag', timeout=15)
-        quantidade_madados = int(el_tag_a.text)
+        quantidade_madados_expedir = int(el_tag_a.text)
         
-        if quantidade_madados > 0:
+        if quantidade_madados_expedir > 0:
             el_tag_a.click() #l:72 (TaskIntimarPessoalmente_SEEU_011.py)
-        return quantidade_madados
+            return quantidade_madados_expedir
+        else:
+            raise Exception('Nenhum mandado para expedir')
                 
                 
  
@@ -623,7 +623,7 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
     return None 
 
          
-def pagina_2(driver):
+def acessar_mandados_pre_analise(driver):
     """
       Acessa os madados no na aba de compridos e para cada mandado clica na coluna "Pré-Análise" e em "[Analisar]"  
     """
@@ -639,7 +639,7 @@ def pagina_2(driver):
     return processo   
             
             
-def pagina_3(driver):
+def acessar_tab_pre_analise_e_preencher_campos(driver):
     """
         Acessa a página de Pré-Análise, preenche as informações Tipo do Arquivo, Modelo e clica no botão "Digitar Texto"
     """
@@ -664,7 +664,7 @@ def pagina_3(driver):
     print("Fim clique no Digitar Texto")
     
 
-def pagina_4(driver):
+def acessar_editor_documento_salvar_dados(driver):
     """
         Entra no detalhe da pré-análise e salva os dados do editor.
     """
@@ -685,28 +685,27 @@ def pagina_4(driver):
             save_button.click()
             
 
-def pagina_5(driver):
-        """"""
+def acessar_tela_arquivo(driver):
+    while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+        print("Espera Página de Arquivos")
+        time.sleep(0.5)
+    
+    if existe_elemento(driver, '//*[@id="finishButton"]', 'xpath'):
+        save_and_conclude_button =  acessar_elemento(driver, '//*[@id="finishButton"]', 'xpath')
+        save_and_conclude_button.click()
+
         while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
             print("Espera Página de Arquivos")
             time.sleep(0.5)
-        
-        if existe_elemento(driver, '//*[@id="finishButton"]', 'xpath'):
-            save_and_conclude_button =  acessar_elemento(driver, '//*[@id="finishButton"]', 'xpath')
-            save_and_conclude_button.click()
 
-            while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
-                print("Espera Página de Arquivos")
-                time.sleep(0.5)
+        if existe_elemento(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath'):
+            alter_button = acessar_elemento(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath')
+            alter_button.click()
 
-            if existe_elemento(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath'):
-                alter_button = acessar_elemento(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath')
-                alter_button.click()
-
-            time.sleep(1)
+        time.sleep(1)
             
 
-def pagina_6(driver):
+def acessar_processo_e_preenchar_dados(driver):
     if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath'):
         warrant_classification = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath')
         warrant_classification.click()
