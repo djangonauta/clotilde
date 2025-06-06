@@ -373,13 +373,13 @@ def continua_seeu_apos_login(driver):
                     pass
                 
                 try:
-                    pagina_7(driver)
+                    abrir_modal_selecao_documentos(driver)
                     logger.info(f'Finalizou pagina_7')
                 except Exception as e:
                     pass
                 
                 try:
-                    pagina_8(driver)
+                    selecionar_documentos_outras_decisoes(driver)
                     logger.info(f'Finalizou pagina_8')
                 except Exception as e:
                     pass
@@ -688,21 +688,13 @@ def acessar_editor_documento_salvar_dados(driver):
 def acessar_tela_arquivo(driver):
     while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
         print("Espera Página de Arquivos")
-        time.sleep(0.5)
-    
-    if existe_elemento(driver, '//*[@id="finishButton"]', 'xpath'):
-        save_and_conclude_button =  acessar_elemento(driver, '//*[@id="finishButton"]', 'xpath')
-        save_and_conclude_button.click()
+    acessar_elemento_clicavel(driver, '//*[@id="finishButton"]', 'xpath').click()
 
-        while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
-            print("Espera Página de Arquivos")
-            time.sleep(0.5)
+    while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+        print("Espera Página de Arquivos")
+    acessar_elemento_clicavel(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath').click()
 
-        if existe_elemento(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath'):
-            alter_button = acessar_elemento(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath')
-            alter_button.click()
-
-        time.sleep(1)
+    time.sleep(1)
             
 
 def acessar_processo_e_preenchar_dados(driver):
@@ -741,7 +733,7 @@ def acessar_processo_e_preenchar_dados(driver):
                 save_button.click()
                 
                 
-def pagina_7(driver): # l: 702 (TaskIntimarPessoalmente_SEEU_011)
+def abrir_modal_selecao_documentos(driver): # l: 702 (TaskIntimarPessoalmente_SEEU_011)
     while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
         logger.info("Espera Página de Arquivos")
         time.sleep(0.5)
@@ -753,7 +745,7 @@ def pagina_7(driver): # l: 702 (TaskIntimarPessoalmente_SEEU_011)
         time.sleep(2)
     
     
-def pagina_8(driver):
+def selecionar_documentos_outras_decisoes(driver):
     if existe_elemento(driver, '//iframe[@frameborder="0"]', 'xpath', timeout=60):
         pop_up_frame = acessar_elemento(driver, '//iframe[@frameborder="0"]', 'xpath')
         pop_up_name = pop_up_frame.get_attribute('name')
