@@ -337,20 +337,20 @@ def continua_seeu_apos_login(driver):
             continuacao = False
             time.sleep(1.5)
             
-            acessar_mesa_analista_tab_inicio(driver)
+            acessar_mesa_analista_tab_inicio(driver) #l:633, pagina_1 (TaskIntimarPessoalmente_SEEU_11)
             
-            acessar_mandados_pre_analise(driver)
+            acessar_mandados_pre_analise(driver) #l640, pagina_2 (TaskIntimarPessoalmente_SEEU_11.py)
             
             # TODO Aqui entraria a parte do log e geração de arquivo em excell
             
             try:
-                acessar_tab_pre_analise_e_preencher_campos(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
+                acessar_tab_pre_analise_e_preencher_campos(driver) #l:649, pagina_3 (TaskIntimarPessoalmente_SEEU_11)
             except Exception as e:
                 # TODO Caso ocorra excessão enviar error para o log.
                 pass
                 
             try:
-                acessar_editor_documento_salvar_dados(driver)
+                acessar_editor_documento_salvar_dados(driver) #l:663, pagina_4 (TaskIntimarPessoalmente_SEEU_11.py)
                 logger.info(f'Finalizou pagina_4')
             except Exception as e:
                 # TODO Caso ocorra excessão enviar error para o log.
@@ -375,13 +375,13 @@ def continua_seeu_apos_login(driver):
                 pass
             
             try:
-                selecionar_documentos_outras_decisoes(driver)
+                selecionar_documentos_outras_decisoes(driver) #l:715, pagina_8(TaskIntimarPessoalmente_SEEU_011.py)
                 logger.info(f'Finalizou pagina_8')
             except Exception as e:
                 pass
             
             try:
-                postegar_assinatura_arquivo(driver)
+                postegar_assinatura_arquivo(driver) #l:728, pagina_9(TaskIntimarPessoalmente_SEEU_011.py)
                 logger.info(f'Finalizou pagina_9')
             except Exception as e:
                 pass
@@ -485,9 +485,9 @@ def acessar_vara(driver, elementos):
 def acessar_mesa_analista_tab_inicio(driver: WebDriver):  #l:50 (pagina_1)
     driver.switch_to.frame(acessar_elemento_visivel(driver, 'userMainFrame'))
 
-    el_container = acessar_elemento(driver, 'container', timout=60)
-    el_content = acessar_elemento(el_container, 'content')
-    mesa_analista_form = acessar_elemento(el_content, 'mesaAnalistaForm')
+    el_container = acessar_elemento_visivel(driver, 'container', timeout=60)
+    el_content = acessar_elemento_visivel(el_container, 'content')
+    mesa_analista_form = acessar_elemento_visivel(el_content, 'mesaAnalistaForm')
     
     while elemento_por_texto_em_lista_by_tag(mesa_analista_form, 'h3', 'Mesa do(a) Analista Judiciário') is None:
         logger.info('Espera Página de Mesa do Analista Judiciário')
@@ -501,7 +501,7 @@ def acessar_tab_outros_cumprimentos(driver):
         Método pagina_1: robo clóvis
         Acessa a aba outros cumprimentos, procura pelo cumprimento Madado e se existir clica no link da coluna para expedir (número de mandados)
     """
-    acessar_elemento_clicavel(driver, '//*[@name="tabOutrosCumprimentos"]', 'xpath').click()
+    acessar_elemento_clicavel(driver, '//*[@name="tabOutrosCumprimentos"]', 'xpath').click() #:61, pagina_1 (TaskIntimarPessoalmente_SEEU_011.py)
         
     tabela = buscar_tabela_por_texto(driver, 'Para Expedir', nao_incluso='Outros Cumprimentos') 
     tr = elemento_por_texto_em_lista_by_tag(tabela, 'tr', 'Mandado') #l:66 (TaskIntimarPessoalmente_SEEU_011.py)
@@ -619,7 +619,7 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
     return None 
 
          
-def acessar_mandados_pre_analise(driver):
+def acessar_mandados_pre_analise(driver): #l:76, pagina_2(TaskIntimarPassoalmente_SEEU_011.py)
     """
       Acessa os madados no na aba de compridos e para cada mandado clica na coluna "Pré-Análise" e em "[Analisar]"  
     """
