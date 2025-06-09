@@ -729,32 +729,25 @@ def selecionar_documentos_outras_decisoes(driver):
 
     driver.switch_to.frame(pop_up_frame)
     
-    if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath'):
-        table = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath')
-        
-        if existe_elemento(table, 'tr', 'tag'):            
-            trs = acessar_elementos(table, 'tr', 'tag')
-    
-            funcionou, opcao, indice = selecionar_anexo(trs)
+    table = acessar_elemento_visivel(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath')
+    trs = acessar_elementos_visiveis(table, 'tr', 'tag')
+    funcionou, opcao, indice = selecionar_anexo(trs)
 
-            if funcionou:
-                if existe_elemento(trs[indice+2], 'input', 'tag'):
-                    input_check = acessar_elementos(trs[indice+2], 'input', 'tag')                            
-                    input_check[0].click() 
-                    time.sleep(0.5)
-                    
-                    if existe_elemento(driver, '//*[@id="selectButton"]', 'xpath'):
-                        select = acessar_elemento(driver, '//*[@id="selectButton"]', 'xpath')
-                        select.click()
-            else:
-                mensagem = "Não foi possível encontrar checkbox de um documento válido. Realize o procedimento adequado para esse caso."
-                logger.info("Não foi possível encontrar checkbox de um documento válido. Aguardando o usuário realizar procedimento adequado.")
-                logger.warning(mensagem)
-            while elemento_por_texto_em_lista_by_tag(driver, "h3", "Seleção de Documentos") is not None:
-                logger.info("Espera Sair de Seleção de Documentos")
-                time.sleep(0.5)
+    if funcionou:
+        inputs_check = acessar_elementos_visiveis(trs[indice+2], 'input', 'tag')
+        inputs_check[0].click()
+        time.sleep(0.5)
+        acessar_elemento_clicavel(driver, '//*[@id="selectButton"]', 'xpath').click()
+    else:
+        mensagem = "Não foi possível encontrar checkbox de um documento válido. Realize o procedimento adequado para esse caso."
+        logger.info("Não foi possível encontrar checkbox de um documento válido. Aguardando o usuário realizar procedimento adequado.")
+        logger.warning(mensagem)
+    while elemento_por_texto_em_lista_by_tag(driver, "h3", "Seleção de Documentos") is not None:
+        logger.info("Espera Sair de Seleção de Documentos")
+        time.sleep(0.5)
 
-            return opcao
+        return opcao
+            
             
 def postegar_assinatura_arquivo(driver):
     driver.switch_to.default_content() #;:339 (TaskIntimarPessoalmente_SEEU_011.py)
