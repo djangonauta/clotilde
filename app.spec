@@ -4,6 +4,7 @@ import os.path
 block_cipher = None
 base_dir = os.path.abspath(os.getcwd())
 
+
 added_files = [
     ('_internal/assets', 'assets'),
     ('templates', 'templates'),
@@ -20,7 +21,7 @@ excludes = [
     'seaborn', 'sklearn', 'tensorflow', 'torch',
 
     # Servidores web alternativos
-    'gunicorn', 'uwsgi', 'waitress', 'cherrypy',
+    'gunicorn', 'uwsgi', 'cherrypy',
     'tornado', 'aiohttp', 'fastapi', 'flask',
 
     # Bancos de dados não utilizados
@@ -53,6 +54,7 @@ excludes = [
     'cryptography.hazmat.backends.openssl.x448',
     'cryptography.hazmat.backends.openssl.ed25519',
     'cryptography.hazmat.backends.openssl.ed448',
+    'webview',
 ]
 
 # Pacotes necessários que o PyInstaller pode não detectar automaticamente
@@ -74,8 +76,7 @@ hidden_imports = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.db.models.query',
-    'webview',
-    'webview.platforms.winforms',
+    'waitress',
     'widget_tweaks',
     'widget_tweaks.templatetags',
     'widget_tweaks.templatetags.widget_tweaks',
@@ -100,11 +101,7 @@ a = Analysis(
 )
 
 # Criar o arquivo PYZ
-pyz = PYZ(
-    a.pure,
-    a.zipped_data,
-    cipher=block_cipher
-)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 # Configuração do executável
 exe = EXE(
@@ -114,30 +111,18 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    exclude_binaries=True,
+    exclude_binaries=False,
     name='Clotilde',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
     # icon=os.path.join(base_dir, 'icon.ico'),
-)
-
-# Criação do pacote
-coll = COLLECT(
-    exe,
-    a.binaries,
-    a.zipfiles,
-    a.datas,
-    strip=False,
-    upx=True,
-    upx_exclude=[],
-    name='Clotilde',
 )

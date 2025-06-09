@@ -22,7 +22,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, '_internal', 'static')
 DB_PATH = os.path.join(BASE_DIR, 'db.sqlite3')
 
-settings.configure(
+base_config = dict(
     DEBUG=DEBUG,
     BASE_DIR=BASE_DIR,
     SECRET_KEY=get_random_secret_key(),
@@ -70,10 +70,12 @@ settings.configure(
     STATICFILES_DIRS=[STATIC_DIR],
     STATIC_ROOT=STATIC_ROOT,
     ALLOWED_HOSTS=['localhost', '127.0.0.1'],
-    PROCESSOS={},
+    PROCESSOS={}
 )
 
+settings.configure(**base_config)
 django.setup()
+
 
 urlpatterns = [
     urls.path('', views.index, name='index'),
@@ -84,6 +86,7 @@ urlpatterns = [
 if DEBUG:
     urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
+os.environ.setdefault('DJANGO_RUNSERVER_HIDE_WARNING', 'true')
 application = get_wsgi_application()
 
 if __name__ == '__main__':

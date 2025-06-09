@@ -54,10 +54,22 @@ def caminho_driver_chrome():
 
 def obter_driver_chrome(options=None):
     if options is None:
-        options = Options()
-        options.add_argument('--no-sandbox')
+        options = Options()    # Suprimir logs do DevTools e outros warnings
+        options.add_argument('--log-level=3')  # INFO = 0, WARNING = 1, ERROR = 2, FATAL = 3
+        options.add_argument('--silent')
+        options.add_argument('--disable-logging')
         options.add_argument('--disable-dev-shm-usage')
-        options.add_argument("--disable-gpu")
+        options.add_argument('--no-sandbox')
+
+        # Suprimir logs específicos do GPU/WebGL
+        options.add_argument('--disable-gpu')
+        options.add_argument('--disable-software-rasterizer')
+        options.add_argument('--disable-background-timer-throttling')
+        options.add_argument('--disable-renderer-backgrounding')
+        options.add_argument('--disable-features=TranslateUI')
+
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options.add_experimental_option('useAutomationExtension', False)
 
     return webdriver.Chrome(
         service=Service(ChromeDriverManager().install()),
