@@ -18,7 +18,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
-from automacoes.utils import acessar_elemento_visivel, acessar_elemento_clicavel, acessar_elementos_visiveis, acessar_elemento_frame
+from automacoes.utils import acessar_elemento_visivel, acessar_elemento_clicavel, acessar_elementos_visiveis, acessar_texto_especifico_elemento
 
 import utils
 import time
@@ -336,59 +336,55 @@ def continua_seeu_apos_login(driver):
         while continuacao:
             continuacao = False
             time.sleep(1.5)
-            quantidade_mandados_expedir = acessar_mesa_analista_tab_inicio(driver)
-            logger.info(f'Quantidade de mandados para expedir: {quantidade_mandados_expedir}')
             
-            if quantidade_mandados_expedir > 0:
-                logger.info(f'Finalizou Página 1 com quantidade {quantidade_mandados_expedir}')
+            acessar_mesa_analista_tab_inicio(driver)
+            
+            acessar_mandados_pre_analise(driver)
+            
+            # TODO Aqui entraria a parte do log e geração de arquivo em excell
+            
+            try:
+                acessar_tab_pre_analise_e_preencher_campos(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
+            except Exception as e:
+                # TODO Caso ocorra excessão enviar error para o log.
+                pass
                 
-                processo = acessar_mandados_pre_analise(driver)
-                logger.info(f'Finalizou pagina_2, processo: {processo}')
-                
-                # TODO Aqui entraria a parte do log e geração de arquivo em excell
-                
-                try:
-                    acessar_tab_pre_analise_e_preencher_campos(driver) #l:649 (TaskIntimarPessoalmente_SEEU_11)
-                except Exception as e:
-                    # TODO Caso ocorra excessão enviar error para o log.
-                    pass
-                    
-                try:
-                    acessar_editor_documento_salvar_dados(driver)
-                    logger.info(f'Finalizou pagina_4')
-                except Exception as e:
-                    # TODO Caso ocorra excessão enviar error para o log.
-                    pass
-                
-                try:
-                    acessar_tela_arquivo(driver)
-                    logger.info(f'Finalizou pagina_5')
-                except Exception as e:
-                    pass
-                
-                try:
-                    acessar_processo_e_preenchar_dados(driver)
-                    logger.info(f'Finalizou pagina_6')
-                except Exception as e:
-                    pass
-                
-                try:
-                    abrir_modal_selecao_documentos(driver)
-                    logger.info(f'Finalizou pagina_7')
-                except Exception as e:
-                    pass
-                
-                try:
-                    selecionar_documentos_outras_decisoes(driver)
-                    logger.info(f'Finalizou pagina_8')
-                except Exception as e:
-                    pass
-                
-                try:
-                    pagina_9(driver)
-                    logger.info(f'Finalizou pagina_9')
-                except Exception as e:
-                    pass
+            try:
+                acessar_editor_documento_salvar_dados(driver)
+                logger.info(f'Finalizou pagina_4')
+            except Exception as e:
+                # TODO Caso ocorra excessão enviar error para o log.
+                pass
+            
+            try:
+                acessar_tela_arquivo(driver)
+                logger.info(f'Finalizou pagina_5')
+            except Exception as e:
+                pass
+            
+            try:
+                acessar_processo_e_preenchar_dados(driver)
+                logger.info(f'acessar_processo_e_preenchar_dados')
+            except Exception as e:
+                pass
+            
+            try:
+                abrir_modal_selecao_documentos(driver)
+                logger.info(f'Finalizou pagina_7')
+            except Exception as e:
+                pass
+            
+            try:
+                selecionar_documentos_outras_decisoes(driver)
+                logger.info(f'Finalizou pagina_8')
+            except Exception as e:
+                pass
+            
+            try:
+                postegar_assinatura_arquivo(driver)
+                logger.info(f'Finalizou pagina_9')
+            except Exception as e:
+                pass
 
             
     except Exception as e:
@@ -486,7 +482,7 @@ def acessar_vara(driver, elementos):
         return True
                     
        
-def acessar_mesa_analista_tab_inicio(driver: WebDriver) -> int:  #l:50 (pagina_1)
+def acessar_mesa_analista_tab_inicio(driver: WebDriver):  #l:50 (pagina_1)
     driver.switch_to.frame(acessar_elemento_visivel(driver, 'userMainFrame'))
 
     el_container = acessar_elemento(driver, 'container', timout=60)
@@ -497,10 +493,10 @@ def acessar_mesa_analista_tab_inicio(driver: WebDriver) -> int:  #l:50 (pagina_1
         logger.info('Espera Página de Mesa do Analista Judiciário')
         time.sleep(0.5)
     
-    return acessar_tab_outros_cumprimentos(driver)
+    acessar_tab_outros_cumprimentos(driver)
             
 
-def acessar_tab_outros_cumprimentos(driver) -> int:
+def acessar_tab_outros_cumprimentos(driver):
     """
         Método pagina_1: robo clóvis
         Acessa a aba outros cumprimentos, procura pelo cumprimento Madado e se existir clica no link da coluna para expedir (número de mandados)
@@ -526,8 +522,8 @@ def acessar_tab_outros_cumprimentos(driver) -> int:
         quantidade_madados_expedir = int(el_tag_a.text)
         
         if quantidade_madados_expedir > 0:
+            logger.info(f'Quantidade de mandados para expedir: {quantidade_madados_expedir}')
             el_tag_a.click() #l:72 (TaskIntimarPessoalmente_SEEU_011.py)
-            return quantidade_madados_expedir
         else:
             raise Exception('Nenhum mandado para expedir')
                 
@@ -607,7 +603,7 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
     repete_interno = True
     while repete_interno:
         repete_interno = repete
-        elementos = acessar_elementos_visiveis(driver, tag, 'tag')
+        elementos = acessar_elementos_visiveis(driver, tag, 'tag', timeout=120)
         if elementos:
             for elemento in elementos:
                 continua = True
@@ -635,8 +631,9 @@ def acessar_mandados_pre_analise(driver):
     el_tr = acessar_elemento_visivel(el_table, 'tr', 'tag')
     el_td = acessar_elementos_visiveis(el_tr, 'td', 'tag')
     processo = el_td[5].text 
-    el_td[15].find_elements(by=By.TAG_NAME, value="td")[1].click() # //*[@id="cumprimentoCartorioMandadoForm"]/table[4]/tbody/tr[1]/td[16]/table/tbody/tr/td[2]
-    return processo   
+    if processo:
+        logger.info(f'Finalizou pagina_2, processo: {processo}')
+        el_td[15].find_elements(by=By.TAG_NAME, value="td")[1].click() # //*[@id="cumprimentoCartorioMandadoForm"]/table[4]/tbody/tr[1]/td[16]/table/tbody/tr/td[2]
             
             
 def acessar_tab_pre_analise_e_preencher_campos(driver):
@@ -746,41 +743,40 @@ def abrir_modal_selecao_documentos(driver): # l: 702 (TaskIntimarPessoalmente_SE
     
     
 def selecionar_documentos_outras_decisoes(driver):
-    if existe_elemento(driver, '//iframe[@frameborder="0"]', 'xpath', timeout=60):
-        pop_up_frame = acessar_elemento(driver, '//iframe[@frameborder="0"]', 'xpath')
-        pop_up_name = pop_up_frame.get_attribute('name')
-        pop_up_name = "_".join(pop_up_name.split("_")[:-1])
+    pop_up_frame = acessar_elemento_visivel(driver, '//iframe[@frameborder="0"]', 'xpath', timeout=60)
+    pop_up_name = pop_up_frame.get_attribute('name')
+    pop_up_name = "_".join(pop_up_name.split("_")[:-1])
 
-        driver.switch_to.frame(pop_up_frame)
+    driver.switch_to.frame(pop_up_frame)
+    
+    if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath'):
+        table = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath')
         
-        if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath'):
-            table = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/table[1]/tbody', 'xpath')
-            
-            if existe_elemento(table, 'tr', 'tag'):            
-                trs = acessar_elementos(table, 'tr', 'tag')
-        
-                funcionou, opcao, indice = selecionar_anexo(trs)
+        if existe_elemento(table, 'tr', 'tag'):            
+            trs = acessar_elementos(table, 'tr', 'tag')
+    
+            funcionou, opcao, indice = selecionar_anexo(trs)
 
-                if funcionou:
-                    if existe_elemento(trs[indice+2], 'input', 'tag'):
-                        input_check = acessar_elementos(trs[indice+2], 'input', 'tag')                            
-                        input_check[0].click() 
-                        time.sleep(0.5)
-                        
-                        if existe_elemento(driver, '//*[@id="selectButton"]', 'xpath'):
-                            select = acessar_elemento(driver, '//*[@id="selectButton"]', 'xpath')
-                            select.click()
-                else:
-                    mensagem = "Não foi possível encontrar checkbox de um documento válido. Realize o procedimento adequado para esse caso."
-                    logger.info("Não foi possível encontrar checkbox de um documento válido. Aguardando o usuário realizar procedimento adequado.")
-                    logger.warning(mensagem)
-                while elemento_por_texto_em_lista_by_tag(driver, "h3", "Seleção de Documentos") is not None:
-                    logger.info("Espera Sair de Seleção de Documentos")
+            if funcionou:
+                if existe_elemento(trs[indice+2], 'input', 'tag'):
+                    input_check = acessar_elementos(trs[indice+2], 'input', 'tag')                            
+                    input_check[0].click() 
                     time.sleep(0.5)
+                    
+                    if existe_elemento(driver, '//*[@id="selectButton"]', 'xpath'):
+                        select = acessar_elemento(driver, '//*[@id="selectButton"]', 'xpath')
+                        select.click()
+            else:
+                mensagem = "Não foi possível encontrar checkbox de um documento válido. Realize o procedimento adequado para esse caso."
+                logger.info("Não foi possível encontrar checkbox de um documento válido. Aguardando o usuário realizar procedimento adequado.")
+                logger.warning(mensagem)
+            while elemento_por_texto_em_lista_by_tag(driver, "h3", "Seleção de Documentos") is not None:
+                logger.info("Espera Sair de Seleção de Documentos")
+                time.sleep(0.5)
 
-                return opcao
+            return opcao
             
-def pagina_9(driver):
+def postegar_assinatura_arquivo(driver):
     driver.switch_to.default_content() #;:339 (TaskIntimarPessoalmente_SEEU_011.py)
     
     if existe_elemento(driver, '//*[@name="mainFrame"]', 'xpath'):

@@ -64,6 +64,21 @@ def acessar_elemento_frame(driver, locator_value, locator_type="id", timeout=15)
     except TimeoutException:
         raise TimeoutException(f"Elemento não encontrado após {timeout} segundos. "
                              f"Localizador: {locator_type}='{locator_value}'")
+    
+        
+def acessar_texto_especifico_elemento(driver, locator_value, locator_type="id", timeout=15):
+    try:
+        elemento = WebDriverWait(driver, timeout).until(
+            EC.text_to_be_present_in_element((LOCATOR_MAP[locator_type.lower()], locator_value))
+        )
+        debug_elemento(elemento)
+        
+        return elemento
+    except TimeoutException:
+        raise TimeoutException(f"Elemento não encontrado após {timeout} segundos. "
+                             f"Localizador: {locator_type}='{locator_value}'")
+        
+
         
         
 def debug_elemento(elemento, prefixo=""):
