@@ -598,7 +598,7 @@ def _check_exists_by_xpath(driver, xpath): #l:53 (Metodos.py)
     return True
 
 
-def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_incluso=None): #l:56
+def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_incluso=None): #l:56 TODO Refatorar método para melhorar performace
     print("elemento_por_texto_em_lista_by_tag -", texto)
     repete_interno = True
     while repete_interno:
@@ -752,25 +752,20 @@ def selecionar_documentos_outras_decisoes(driver):
 def postegar_assinatura_arquivo(driver):
     driver.switch_to.default_content() #;:339 (TaskIntimarPessoalmente_SEEU_011.py)
     
-    if existe_elemento(driver, '//*[@name="mainFrame"]', 'xpath'):
-        user_main_frame = acessar_elemento(driver, '//*[@name="mainFrame"]', 'xpath')  # '/html/body/div[2]/iframe'
-        driver.switch_to.frame(user_main_frame)
+    main_frame = acessar_elemento_visivel(driver, '//*[@name="mainFrame"]', 'xpath')
+    driver.switch_to.frame(main_frame)
+    
+    user_main_frame =  acessar_elemento_visivel(driver, '//*[@name="userMainFrame"]', 'xpath')
+    driver.switch_to.frame(user_main_frame)
+    
+    while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+        print("Espera Página de Arquivos")
+        time.sleep(0.5)
 
-        if existe_elemento(driver, '//*[@name="userMainFrame"]', 'xpath'):
-            user_main_frame = acessar_elemento(driver, '//*[@name="userMainFrame"]', 'xpath')  # '/html/body/div[2]/iframe'
-            driver.switch_to.frame(user_main_frame)
+    time.sleep(1)
+    
+    acessar_elemento_clicavel(driver, '//*[@id="postergarButton" and @value="Postergar Assinatura"]', 'xpath').click()
 
-            while elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
-                print("Espera Página de Arquivos")
-                time.sleep(0.5)
-
-            time.sleep(1)
-
-            if existe_elemento(driver, '//*[@id="postergarButton" and @value="Postergar Assinatura"]', 'xpath'):
-                sing_and_ship_button = acessar_elemento(driver, '//*[@id="postergarButton" and @value="Postergar Assinatura"]', 'xpath')
-                sing_and_ship_button.click()
-
-            
             
 def selecionar_anexo(trs):
     despachos = ["Assistência Judiciária Gratuita",
