@@ -694,40 +694,23 @@ def acessar_tela_arquivo(driver):
     time.sleep(1)
             
 
-def acessar_processo_e_preenchar_dados(driver): #TODO refatora condicionais
-    if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath'):
-        warrant_classification = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath')
-        warrant_classification.click()
+def acessar_processo_e_preenchar_dados(driver): 
+    acessar_elemento_clicavel(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[10]/td[2]/label/input[1]', 'xpath').click()
+    acessar_elemento_visivel(driver, '//*[@id="codCustasMandado"]', 'xpath').send_keys('c')
+    acessar_elemento_clicavel(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[6]/td[2]/label[1]/input', 'xpath').click() 
+    acessar_elemento_clicavel(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[12]/td[2]/label[2]/input', 'xpath').click()
+    acessar_elemento_clicavel(driver, '//*[@id="rowAssinadoPorJuiz"]/td[2]/label[2]/input', 'xpath').click()
+    
+    logger.info(f'Acessando id: prazoOficialJustica')
+    probation_officer_term = acessar_elemento_visivel(driver, '//*[@id="prazoOficialJustica"]', 'xpath')
+    
+    for i in range(10): 
+        probation_officer_term.send_keys(Keys.BACK_SPACE)
+    probation_officer_term.send_keys('15')
 
-        if existe_elemento(driver, '//*[@id="codCustasMandado"]', 'xpath'):
-            warrant_cost_select = acessar_elemento(driver, '//*[@id="codCustasMandado"]', 'xpath') # Citação, intimação e notificação
-            warrant_cost_select.send_keys('c')
-            
-        if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[6]/td[2]/label[1]/input', 'xpath'):
-            parte_processo = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[6]/td[2]/label[1]/input', 'xpath')
-            parte_processo.click()
-        
-        if existe_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[12]/td[2]/label[2]/input', 'xpath'):
-            linked_fullfilment = acessar_elemento(driver, '//*[@id="cumprimentoCartorioMandadoForm"]/fieldset/table[1]/tbody/tr[12]/td[2]/label[2]/input', 'xpath') 
-            linked_fullfilment.click()
-            
-        if existe_elemento(driver, '//*[@id="rowAssinadoPorJuiz"]/td[2]/label[2]/input', 'xpath'):
-            digitaly_signed_by_judge = acessar_elemento(driver, '//*[@id="rowAssinadoPorJuiz"]/td[2]/label[2]/input', 'xpath') # não
-            digitaly_signed_by_judge.click()
-            
-        
-        logger.info(f'Acessando id: prazoOficialJustica')
-        if existe_elemento(driver, '//*[@id="prazoOficialJustica"]', 'xpath'):
-            probation_officer_term = acessar_elemento(driver, '//*[@id="prazoOficialJustica"]', 'xpath')
-            for i in range(10): 
-                probation_officer_term.send_keys(Keys.BACK_SPACE)
-            probation_officer_term.send_keys('15')
+    time.sleep(0.5)
 
-            time.sleep(0.5)
-
-            if existe_elemento(driver, '//*[@id="saveButton"]', 'xpath'):
-                save_button = acessar_elemento(driver, '//*[@id="saveButton"]', 'xpath')
-                save_button.click()
+    acessar_elemento_clicavel(driver, '//*[@id="saveButton"]', 'xpath').click()
                 
                 
 def abrir_modal_selecao_documentos(driver): # l: 702 (TaskIntimarPessoalmente_SEEU_011)
