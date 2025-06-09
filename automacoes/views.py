@@ -718,11 +718,8 @@ def abrir_modal_selecao_documentos(driver): # l: 702 (TaskIntimarPessoalmente_SE
         logger.info("Espera Página de Arquivos")
         time.sleep(0.5)
 
-    if existe_elemento(driver, '//input[@id="editButton" and @value="Adicionar"]', 'xpath'):
-        add_button = acessar_elemento(driver, '//input[@id="editButton" and @value="Adicionar"]', 'xpath')
-        add_button.click()
-
-        time.sleep(2)
+    acessar_elemento_clicavel(driver, '//input[@id="editButton" and @value="Adicionar"]', 'xpath').click()
+    time.sleep(2)
     
     
 def selecionar_documentos_outras_decisoes(driver):
