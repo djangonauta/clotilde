@@ -19,6 +19,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 from automacoes.utils import acessar_elemento_visivel, acessar_elemento_clicavel, acessar_elementos_visiveis, acessar_texto_especifico_elemento
+from .services.task_intimar_pessoalmente_seeu_011 import TaskIntimarPessoalmente
 
 import utils
 import time
@@ -65,7 +66,8 @@ def iniciar(request):
 
 
 def iniciar_processo(id_automacao):
-    p = multiprocessing.Process(target=loginSeeu, args=(id_automacao,))
+    taskIntimarPessoalmente = TaskIntimarPessoalmente()
+    p = multiprocessing.Process(target=taskIntimarPessoalmente.iniciar_automacao(), args=(id_automacao,))
     p.daemon = True
     p.start()
     return p
@@ -563,17 +565,17 @@ def buscar_tabela_por_texto(driver, texto, id=False, repete=False, completo=Fals
 
 
 def controlar_tempo_espera(inicio=False, max=600): #l:199 (Metodos.py)
-        if inicio:
-            tempo_espera = 0
-        else:
-            tempo_espera += 1
-            if tempo_espera % 60 == 0:
-                print("Mais 60", tempo_espera)
-        if tempo_espera >= max:
-            print("Excedeu o tempo")
-            raise Exception("Excedeu o tempo")
-        # if trata_solicitacao is not None:
-        #     self.trata_solicitacao()
+    if inicio:
+        tempo_espera = 0
+    else:
+        tempo_espera += 1
+        if tempo_espera % 60 == 0:
+            print("Mais 60", tempo_espera)
+    if tempo_espera >= max:
+        print("Excedeu o tempo")
+        raise Exception("Excedeu o tempo")
+    # if trata_solicitacao is not None:
+    #     self.trata_solicitacao()
             
             
 def identificacao_erros(driver): #l:77 (Metodos.py)
@@ -604,16 +606,16 @@ def elemento_por_texto_em_lista_by_tag(driver, tag, texto, repete=False, nao_inc
     while repete_interno:
         repete_interno = repete
         elementos = acessar_elementos_visiveis(driver, tag, 'tag', timeout=120)
-        if elementos:
-            for elemento in elementos:
-                continua = True
-                if nao_incluso is not None: 
-                    continua = False 
-                    if nao_incluso not in elemento.text:
-                        continua = True
-                if texto in elemento.text and continua \
-                    and "Traceback (most recent call last)" not in elemento.text:
-                    return elemento
+        # if elementos:
+        for elemento in elementos:
+            continua = True
+            if nao_incluso is not None: 
+                continua = False 
+                if nao_incluso not in elemento.text:
+                    continua = True
+            if texto in elemento.text and continua \
+                and "Traceback (most recent call last)" not in elemento.text:
+                return elemento
         # if self.trata_solicitacao is not None:
         #     self.trata_solicitacao()
     return None 
