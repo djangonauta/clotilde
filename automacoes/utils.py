@@ -17,7 +17,7 @@ LOCATOR_MAP = {
 def acessar_elemento_visivel(driver, locator_value, locator_type="id", timeout=15):
     try:
         return WebDriverWait(driver, timeout).until(
-            EC.presence_of_element_located((LOCATOR_MAP[locator_type.lower()], locator_value))
+            EC.visibility_of_element_located((LOCATOR_MAP[locator_type.lower()], locator_value))
         )
         # debug_elemento(elemento)
         
@@ -30,11 +30,9 @@ def acessar_elemento_visivel(driver, locator_value, locator_type="id", timeout=1
 def acessar_elementos_visiveis(driver, locator_value, locator_type="id", timeout=60):
     try:
         return WebDriverWait(driver, timeout).until(
-            EC.presence_of_all_elements_located((LOCATOR_MAP[locator_type.lower()], locator_value))
+            EC.visibility_of_all_elements_located((LOCATOR_MAP[locator_type.lower()], locator_value))
         )
-        # debug_elemento(elemento) TODO Implementar o depurador para listas
-        
-        # return elemento
+
     except TimeoutException:
         raise TimeoutException(f"Elementos não encontrados após {timeout} segundos. "
                              f"Localizador: {locator_type}='{locator_value}'")
@@ -98,3 +96,31 @@ def debug_elemento(elemento, prefixo=""):
         linha += f" → '{texto}'"
     
     print(linha)
+    
+
+def existe_elemento(driver, locator_value, locator_type="id", timeout=15):
+    locator_map = {
+        'id': By.ID,
+        'class': By.CLASS_NAME,
+        'xpath': By.XPATH,
+        'css': By.CSS_SELECTOR,
+        'name': By.NAME,
+        'tag': By.TAG_NAME,
+        'link_text': By.LINK_TEXT,
+        'partial_link_text': By.PARTIAL_LINK_TEXT
+    }
+    
+    try:
+        locator_type_lower = locator_type.lower()
+        if locator_type_lower not in locator_map:
+            raise ValueError(f"O Tipo de localizador '{locator_type}' não é válido.")
+        
+        by_locator = locator_map[locator_type_lower]
+        
+        WebDriverWait(driver, timeout).until(
+                EC.presence_of_element_located((by_locator, locator_value)))
+      
+        return True
+    except Exception as e:
+        logger.error(f"Elemento não encontrado: {locator_type}='{locator_value}' - {str(e)}")
+        return False

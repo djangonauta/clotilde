@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 
 from selenium.common.exceptions import NoSuchElementException
 
-from automacoes.utils import acessar_elemento_visivel, acessar_elemento_clicavel, acessar_elementos_visiveis, debug_elemento
+from automacoes.utils import acessar_elemento_visivel, acessar_elemento_clicavel, acessar_elementos_visiveis, existe_elemento
 
 import os.path
 import time
@@ -34,6 +34,20 @@ class TaskIntimarPessoalmente:
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-plugins-discovery")
         options.add_argument("--start-maximized")
+        options.add_argument("--dissable-cache")
+        
+        # Disable cache
+        options.add_argument("--disable-application-cache")
+        options.add_argument("--disable-cache")
+        options.add_argument("--disable-disk-cache")
+        options.add_argument("--disable-memory-cache")
+        options.add_argument("--disable-offline-load-stale-cache")
+        options.add_argument("--disk-cache-size=0")
+        
+        # Additional cache-related arguments
+        options.add_argument("--aggressive-cache-discard")
+        options.add_argument("--disable-background-timer-throttling")
+        options.add_argument("--disable-backgrounding-occluded-windows")
         
         return webdriver.Chrome(
                 service=Service(os.path.expanduser('~/chromedriver')),
@@ -100,7 +114,7 @@ class TaskIntimarPessoalmente:
         repete_interno = True
         while repete_interno:
             repete_interno = repete
-            elementos = acessar_elementos_visiveis(driver, tag, 'tag', timeout=120)
+            elementos = acessar_elementos_visiveis(driver, tag, 'tag')
             # if elementos:
             for elemento in elementos:
                 continua = True
@@ -117,9 +131,8 @@ class TaskIntimarPessoalmente:
     
     
     def __controlar_tempo_espera(self, inicio=False, max=600): #l:199 (Metodos.py)
-        if inicio:
-            tempo_espera = 0
-        else:
+        tempo_espera = 0
+        if not inicio:
             tempo_espera += 1
             if tempo_espera % 60 == 0:
                 print("Mais 60", tempo_espera)
@@ -163,23 +176,24 @@ class TaskIntimarPessoalmente:
             self.__controlar_tempo_espera(max=300)
             repete_interno = repete
             
-            tabelas = acessar_elementos_visiveis(driver, 'table', 'tag')
-            
-            if tabelas:
-                for index, tabela in enumerate(tabelas):
-                    if "Traceback (most recent call last)" not in tabela.text:
-                        continua = True
-                        if nao_incluso is not None:
-                            continua = False
-                            if nao_incluso not in tabela.text:
-                                continua = True
-                        if texto in tabela.text and continua:
-                            if completo:
-                                return index, tabela, tabelas
-                            if id:
-                                return index
-                            return tabela
-        return None
+            if existe_elemento(driver, 'table', 'tag'):
+                tabelas = acessar_elementos_visiveis(driver, 'table', 'tag')
+                
+                if tabelas:
+                    for index, tabela in enumerate(tabelas):
+                        if "Traceback (most recent call last)" not in tabela.text:
+                            continua = True
+                            if nao_incluso is not None:
+                                continua = False
+                                if nao_incluso not in tabela.text:
+                                    continua = True
+                            if texto in tabela.text and continua:
+                                if completo:
+                                    return index, tabela, tabelas
+                                if id:
+                                    return index
+                                return tabela
+            return None
     
     
     def __filtrar_por_varas_excecucoes_penais(self, nome_vara):
@@ -190,7 +204,7 @@ class TaskIntimarPessoalmente:
             
     def acessar_vara(self, driver, elementos): 
         for elemento in elementos:
-            acessar_elemento_clicavel(elemento, 'a', 'tag').click()
+            acessar_elemento_clicavel(elemento, 'a', 'tag', timeout=60).click()
             # logger.info(f'Acessando a vara: {debug_elemento(elemento)}')
             
             driver.switch_to.default_content()
@@ -199,53 +213,54 @@ class TaskIntimarPessoalmente:
             logger.info('Recarregar os elementos na tela de varas')
             
             # Abre o primeiro shadowroot
-            shadow_root_01 = acessar_elemento_visivel(driver, '#header', 'css', timeout=60).shadow_root
-            logger.info('Abre novamente o shadow root')
-            # Elemento de texto começa a partir do terceiro filho
-            count = 3
+            if existe_elemento(driver, '#header', 'css'):
+                shadow_root_01 = acessar_elemento_visivel(driver, '#header', 'css', timeout=60).shadow_root
+                logger.info('Abre novamente o shadow root')
+                # Elemento de texto começa a partir do terceiro filho
+                count = 3
             
-            try:
-                while True:
-                    # Localiza a vara a ser trocada
-                    nome_vara = str(shadow_root_01.find_element(By.CSS_SELECTOR,
-                        'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text).strip()
-                    if nome_vara:
-                        filtro_vara = self.__filtrar_por_varas_excecucoes_penais(nome_vara)
-                        if len(filtro_vara) > 0:
-                            element_in_shadow = shadow_root_01.find_element(By.CSS_SELECTOR,
-                                                    'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')')
-                            
-                            driver.execute_script("arguments[0].click();", element_in_shadow)
-                            logger.info(f'Nome da Vara: {nome_vara}')
-                            
-                            break
-                        else:
-                            count += 1
-            except Exception as e:
-                logger.info(repr(e))
-                logger.info(f'Não foi possivel localizar a vara informada: {nome_vara}')
+                try:
+                    while True:
+                        # Localiza a vara a ser trocada
+                        nome_vara = str(shadow_root_01.find_element(By.CSS_SELECTOR,
+                            'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')').text).strip()
+                        if nome_vara:
+                            filtro_vara = self.__filtrar_por_varas_excecucoes_penais(nome_vara)
+                            if len(filtro_vara) > 0:
+                                element_in_shadow = shadow_root_01.find_element(By.CSS_SELECTOR,
+                                                        'div.flex-grow seeu-dropdown seeu-menu-item:nth-child(' + str(count) + ')')
+                                
+                                driver.execute_script("arguments[0].click();", element_in_shadow)
+                                logger.info(f'Nome da Vara: {nome_vara}')
+                                
+                                break
+                            else:
+                                count += 1
+                except Exception as e:
+                    logger.info(repr(e))
+                    logger.info(f'Não foi possivel localizar a vara informada: {nome_vara}')
+                    
+                    return False
                 
-                return False
-            
-            return True
+                return True
       
       
     def acessar_lista_atuacao(self, driver): #l:526 (ExecuteAlteraVara - TaskIntimarPessoalmente_SEEU_011)
         locator_value = 'listaAreavara'
-        el_lista_area_vara = acessar_elemento_visivel(driver, locator_value)
+        acessar_elemento_visivel(driver, locator_value, timeout=60)
+        time.sleep(0.5)
+        # if el_lista_area_vara:
+        locator_value = f"#{locator_value} li"
+        elementos = acessar_elementos_visiveis(driver, locator_value, 'css')
+        result = self.acessar_vara(driver, elementos) # l:528 (TaskIntimarPessoalmente_SEEU_011.PY)
         
-        if el_lista_area_vara:
-            locator_value = f"#{locator_value} li"
-            elementos = acessar_elementos_visiveis(driver, locator_value, 'css')
-            result = self.acessar_vara(driver, elementos) # l:528 (TaskIntimarPessoalmente_SEEU_011.PY)
+        if not result:
+            logger.info('Nao foi possivel alterar a vara')
+            logger.info('Finalizando robo')
             
-            if not result:
-                logger.info('Nao foi possivel alterar a vara')
-                logger.info('Finalizando robo')
-                
-                return result
-            
-            return driver      
+            return result
+        
+        return driver      
     
     
 
@@ -260,17 +275,17 @@ class TaskIntimarPessoalmente:
             if not driver:
                 raise Exception('Falha ao mudar de vara')
             
-            logger.info('Acessou a mesa do analista') #l:628
+            
             
             continuacao = True
             while continuacao:
                 continuacao = False
-                # time.sleep(1.5)
+                time.sleep(1)
                 
                 self.acessar_mesa_analista_tab_inicio(driver) #l:633, pagina_1 (TaskIntimarPessoalmente_SEEU_11)
-                
+                time.sleep(1)
                 self.acessar_mandados_pre_analise(driver) #l640, pagina_2 (TaskIntimarPessoalmente_SEEU_11.py)
-                
+                time.sleep(1)
                 # TODO Aqui entraria a parte do log e geração de arquivo em excell
                 
                 try:
@@ -278,38 +293,39 @@ class TaskIntimarPessoalmente:
                 except Exception as e:
                     # TODO Caso ocorra excessão enviar error para o log.
                     pass
-                    
+                
+                time.sleep(1)
                 try:
                     self.acessar_editor_documento_salvar_dados(driver) #l:663, pagina_4 (TaskIntimarPessoalmente_SEEU_11.py)
                     logger.info(f'Finalizou pagina_4')
                 except Exception as e:
                     # TODO Caso ocorra excessão enviar error para o log.
                     pass
-                
+                time.sleep(1)
                 try:
                     self.acessar_tela_arquivo(driver)
                     logger.info(f'Finalizou pagina_5')
                 except Exception as e:
                     pass
-                
+                time.sleep(1)
                 try:
                     self.acessar_processo_e_preenchar_dados(driver)
                     logger.info(f'acessar_processo_e_preenchar_dados')
                 except Exception as e:
                     pass
-                
+                time.sleep(1)
                 try:
                     self.abrir_modal_selecao_documentos(driver)
                     logger.info(f'Finalizou pagina_7')
                 except Exception as e:
                     pass
-                
+                time.sleep(1)
                 try:
                     self.selecionar_documentos_outras_decisoes(driver) #l:715, pagina_8(TaskIntimarPessoalmente_SEEU_011.py)
                     logger.info(f'Finalizou pagina_8')
                 except Exception as e:
                     pass
-                
+                time.sleep(1)
                 try:
                     self.postegar_assinatura_arquivo(driver) #l:728, pagina_9(TaskIntimarPessoalmente_SEEU_011.py)
                     logger.info(f'Finalizou pagina_9')
@@ -326,8 +342,10 @@ class TaskIntimarPessoalmente:
         time.sleep(2)
         
         
-    def acessar_mesa_analista_tab_inicio(self, driver: WebDriver):  #l:50 (pagina_1)
-        driver.switch_to.frame(acessar_elemento_visivel(driver, 'userMainFrame'))
+    def acessar_mesa_analista_tab_inicio(self, driver):  #l:50 (pagina_1)
+        logger.info('Acessou a mesa do analista') #l:628
+        user_main_frame = acessar_elemento_visivel(driver, 'userMainFrame', timeout=60)
+        driver.switch_to.frame(user_main_frame)
 
         el_container = acessar_elemento_visivel(driver, 'container', timeout=60)
         el_content = acessar_elemento_visivel(el_container, 'content')
