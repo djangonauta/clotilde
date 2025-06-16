@@ -1,9 +1,10 @@
 [project]
-name = "clotilde"
+name = "Robôs-RPA"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Igor Carvalho",email = "igor.carvalho@tjpa.jus.br"}
+    {name = "Igor Carvalho",email = "igor.carvalho@tjpa.jus.br"},
+    {name = "Rodrigo Resque",email = "rodrigo.resque@tjpa.jus.br"}
 ]
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
