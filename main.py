@@ -78,6 +78,8 @@ def abrir_navegador(host='127.0.0.1', porta=8000, atraso=2):
 
 def start_django_server():
     print(LOGO)
+    print('Iniciando servidor da aplicação.\n'
+          'Para parar a aplicação pressione Control + C, e/ou feche essa janela de suporte terminal.')
     waitress.serve(dj.application, host='127.0.0.1', port=8000, threads=6)
 
 

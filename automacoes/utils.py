@@ -1,10 +1,8 @@
 import ctypes
 import functools
 import os
-import os.path
 import platform
 import signal
-import sys
 import tkinter as tk
 from tkinter import messagebox
 
@@ -37,21 +35,6 @@ def plataforma_windows():
     return platform.system().lower() == 'windows'
 
 
-def is_frozen():
-    return getattr(sys, 'frozen', False)
-
-
-def caminho_driver_chrome():
-    # if is_frozen():
-    # return os.path.join(sys._MEIPASS, 'chromedriver.exe')
-
-    caminho = '~/chromedriver'
-    if plataforma_windows():
-        caminho += '.exe'
-
-    return os.path.expanduser(caminho)
-
-
 def obter_driver_chrome(options=None):
     if options is None:
         options = Options()    # Suprimir logs do DevTools e outros warnings
@@ -73,7 +56,6 @@ def obter_driver_chrome(options=None):
 
     return webdriver.Chrome(
         service=Service(ChromeDriverManager().install()),
-        # service=Service(utils.caminho_driver_chrome()),
         options=options,
     )
 

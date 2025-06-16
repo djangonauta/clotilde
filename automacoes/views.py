@@ -41,9 +41,12 @@ def cancelar_processo(request, id_processo):
 
 def iniciar(request):
     automacao = models.Automacao.objects.create(nome='iniciar')
+    processo = multiprocessing.Process(target=iniciar_automacao, args=(automacao.id,))
+    processo.start()
+
     id_processo = str(uuid.uuid4())
-    processo = iniciar_processo(automacao.id)
     settings.PROCESSOS[id_processo] = processo
+
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return http.JsonResponse({
             'status': 'success',
@@ -55,14 +58,7 @@ def iniciar(request):
     return shortcuts.redirect('index')
 
 
-def iniciar_processo(id_automacao):
-    p = multiprocessing.Process(target=tarefa, args=(id_automacao,))
-    p.daemon = True
-    p.start()
-    return p
-
-
-def tarefa(id_automacao):
+def iniciar_automacao(id_automacao):
     automacao = models.Automacao.objects.get(pk=id_automacao)
     try:
         driver = utils.obter_driver_chrome()

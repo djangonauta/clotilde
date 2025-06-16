@@ -86,7 +86,6 @@ urlpatterns = [
 if DEBUG:
     urlpatterns += static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-os.environ.setdefault('DJANGO_RUNSERVER_HIDE_WARNING', 'true')
 application = get_wsgi_application()
 
 if __name__ == '__main__':
