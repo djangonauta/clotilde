@@ -27,7 +27,8 @@ function configurarAutomacoes() {
       const barraProgresso = element.querySelector('.progress-bar');
       barraProgresso.style = `width: 0%`
 
-      const response = await fetch('/automacoes/iniciar/', {
+      const url = element.dataset.url;
+      const response = await fetch(url, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest'
         }
@@ -45,7 +46,7 @@ function configurarAutomacoes() {
         });
         const data = await response.json();
         barraProgresso.style = `width: ${data.porcentagem}%`
-        if (data.porcentagem >= 100) {
+        if (data.porcentagem >= 100 || data.status === 2) {
           iniciarAtivo();
           clearInterval(poolling);
         }

@@ -12,7 +12,7 @@
 
     <div class="tab-content" id="automationTabsContent">
       <div class="tab-pane fade show active" id="seeu" role="tabpanel" aria-labelledby="seeu-tab">
-        <table class="table table-bordered table-hover" automacao>
+        <table class="table table-bordered table-hover" data-url="{% url 'automacoes:iniciar' %}" automacao>
           <tr>
             <td>Automação teste</td>
             <td style="width: 60%">
@@ -29,7 +29,7 @@
             </td>
           </tr>
         </table>
-        <table class="table table-bordered table-hover" automacao>
+        <table class="table table-bordered table-hover" data-url="{% url 'automacoes:iniciar' %}" automacao>
           <tr>
             <td>Automação teste</td>
             <td style="width: 60%">
@@ -46,9 +46,26 @@
             </td>
           </tr>
         </table>
-        <table class="table table-bordered table-hover" automacao>
+        <table class="table table-bordered table-hover" data-url="{% url 'automacoes:iniciar' %}" automacao>
           <tr>
             <td>Automação teste</td>
+            <td style="width: 60%">
+              <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0"
+                aria-valuemax="100">
+                <div class="progress-bar" style="width: 0%"></div>
+              </div>
+            </td>
+            <td>
+              <button class="iniciar btn btn-primary btn-sm">Iniciar</button>
+              <button class="pausar btn btn-warning btn-sm">Pausar</button>
+              <button class="continuar btn btn-success btn-sm">Continuar</button>
+              <button class="cancelar btn btn-danger btn-sm">Cancelar</button>
+            </td>
+          </tr>
+        </table>
+        <table class="table table-bordered table-hover" data-url="{% url 'automacoes:seeu:intimar_pessoalmente_a_partir_despacho' %}" automacao>
+          <tr>
+            <td>Intimar pessoalmente a partir de despacho</td>
             <td style="width: 60%">
               <div class="progress" role="progressbar" aria-label="Basic example" aria-valuenow="0" aria-valuemin="0"
                 aria-valuemax="100">

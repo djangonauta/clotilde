@@ -13,10 +13,12 @@ import views
 DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_ROOT = os.path.join(BASE_DIR, '_internal', 'assets')
+SEEU_URL = 'https://seeuintegra.pje.jus.br/seeu/'
 if getattr(sys, 'frozen', False):
     DEBUG = False
     BASE_DIR = sys._MEIPASS
     STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+    SEEU_URL = ''
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, '_internal', 'static')
@@ -39,6 +41,7 @@ base_config = dict(
     ],
     INSTALLED_APPS=[
         'automacoes',
+        'automacoes.seeu',
         'django.contrib.auth',
         'django.contrib.contenttypes',
         'django.contrib.sessions',
@@ -70,6 +73,7 @@ base_config = dict(
     STATICFILES_DIRS=[STATIC_DIR],
     STATIC_ROOT=STATIC_ROOT,
     ALLOWED_HOSTS=['localhost', '127.0.0.1'],
+    SEEU_URL=SEEU_URL,
     PROCESSOS={}
 )
 
