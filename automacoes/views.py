@@ -534,13 +534,13 @@ def acessar_tab_outros_cumprimentos(driver):
         
 def buscar_tabela_por_texto(driver, texto, id=False, repete=False, completo=False, nao_incluso=None): #l:285 (Metodos.py)
     logger.info(f'buscar_tabela_por_texto - {texto}')
-    controlar_tempo_espera(True)
+    # controlar_tempo_espera(True)
     repete_interno = True
     
     while repete_interno:
-        time.sleep(0.1)
-        identificacao_erros(driver)
-        controlar_tempo_espera(300)
+        # time.sleep(0.1)
+        # identificacao_erros(driver)
+        # controlar_tempo_espera(300)
         repete_interno = repete
         
         tabelas = acessar_elementos_visiveis(driver, 'table', 'tag')

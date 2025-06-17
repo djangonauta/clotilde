@@ -20,8 +20,8 @@ import re
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
-corporativo_cpf = os.getenv('CORPORATIVO_SEEU')
-corporativo_pass = os.getenv('CORPORATIVO_PASS')
+corporativo_login = os.environ.get('CORPORATIVO_LOGIN')
+corporativo_pass = os.environ.get('CORPORATIVO_PASS')
 
 class TaskIntimarPessoalmente:
     
@@ -84,7 +84,7 @@ class TaskIntimarPessoalmente:
                         nova_aba = str(nova_aba)
                     driver.switch_to.window(str(nova_aba))
                     
-                    acessar_elemento_visivel(driver, 'username').send_keys(corporativo_cpf)
+                    acessar_elemento_visivel(driver, 'username').send_keys(corporativo_login)
                     acessar_elemento_visivel(driver, 'password').send_keys(corporativo_pass)
                     acessar_elemento_clicavel(driver, 'kc-login').click()
                     
@@ -115,16 +115,16 @@ class TaskIntimarPessoalmente:
         while repete_interno:
             repete_interno = repete
             elementos = acessar_elementos_visiveis(driver, tag, 'tag')
-            # if elementos:
-            for elemento in elementos:
-                continua = True
-                if nao_incluso is not None: 
-                    continua = False 
-                    if nao_incluso not in elemento.text:
-                        continua = True
-                if texto in elemento.text and continua \
-                    and "Traceback (most recent call last)" not in elemento.text:
-                    return elemento
+            if elementos:
+                for elemento in elementos:
+                    continua = True
+                    if nao_incluso is not None: 
+                        continua = False 
+                        if nao_incluso not in elemento.text:
+                            continua = True
+                    if texto in elemento.text and continua \
+                        and "Traceback (most recent call last)" not in elemento.text:
+                        return elemento
             # if self.trata_solicitacao is not None:
             #     self.trata_solicitacao()
         return None 
@@ -166,34 +166,29 @@ class TaskIntimarPessoalmente:
     
     
     def __buscar_tabela_por_texto(self, driver, texto, id=False, repete=False, completo=False, nao_incluso=None): #l:285 (Metodos.py)
-        logger.info(f'buscar_tabela_por_texto - {texto}')
-        self.__controlar_tempo_espera(inicio=True)
+        print("buscar_tabela_por_texto -", texto)
+        self.__controlar_tempo_espera(True)
         repete_interno = True
-        
         while repete_interno:
             time.sleep(0.1)
             self.__identificacao_erros(driver)
             self.__controlar_tempo_espera(max=300)
             repete_interno = repete
-            
-            if existe_elemento(driver, 'table', 'tag'):
-                tabelas = acessar_elementos_visiveis(driver, 'table', 'tag')
-                
-                if tabelas:
-                    for index, tabela in enumerate(tabelas):
-                        if "Traceback (most recent call last)" not in tabela.text:
+            tabelas = driver.find_elements(by=By.TAG_NAME, value='table')
+            for index, tabela in enumerate(tabelas):
+                if "Traceback (most recent call last)" not in tabela.text:
+                    continua = True
+                    if nao_incluso is not None: 
+                        continua = False 
+                        if nao_incluso not in tabela.text:
                             continua = True
-                            if nao_incluso is not None:
-                                continua = False
-                                if nao_incluso not in tabela.text:
-                                    continua = True
-                            if texto in tabela.text and continua:
-                                if completo:
-                                    return index, tabela, tabelas
-                                if id:
-                                    return index
-                                return tabela
-            return None
+                    if texto in tabela.text and continua:
+                        if completo:
+                            return index, tabela, tabelas
+                        if id:
+                            return index
+                        return tabela
+        return None
     
     
     def __filtrar_por_varas_excecucoes_penais(self, nome_vara):
@@ -294,28 +289,26 @@ class TaskIntimarPessoalmente:
                     # TODO Caso ocorra excessão enviar error para o log.
                     pass
                 
-                time.sleep(1)
+                # time.sleep(1)
                 try:
-                    self.acessar_editor_documento_salvar_dados(driver) #l:663, pagina_4 (TaskIntimarPessoalmente_SEEU_11.py)
+                    self.acessar_editor_documento_salvar_dados(driver) #l:113, pagina_4 (TaskIntimarPessoalmente_SEEU_11.py)
                     logger.info(f'Finalizou pagina_4')
                 except Exception as e:
                     # TODO Caso ocorra excessão enviar error para o log.
                     pass
                 time.sleep(1)
                 try:
-                    self.acessar_tela_arquivo(driver)
+                    self.acessar_tela_arquivo(driver) # l:129 (TaskIntimarPessoalmente_SEEU_011.py)
                     logger.info(f'Finalizou pagina_5')
                 except Exception as e:
                     pass
-                time.sleep(1)
                 try:
-                    self.acessar_processo_e_preenchar_dados(driver)
+                    self.acessar_processo_e_preenchar_dados(driver) #l:147 (TaskIntimarPessoalmente_SEEU_011.py)
                     logger.info(f'acessar_processo_e_preenchar_dados')
                 except Exception as e:
                     pass
-                time.sleep(1)
                 try:
-                    self.abrir_modal_selecao_documentos(driver)
+                    self.abrir_modal_selecao_documentos(driver) #l170 (TaskIntimarPessoalmente_SEEU_011.py)
                     logger.info(f'Finalizou pagina_7')
                 except Exception as e:
                     pass
@@ -433,35 +426,31 @@ class TaskIntimarPessoalmente:
         
         
     def acessar_editor_documento_salvar_dados(self, driver): #TODO refatora condicionais
-        """
-            Entra no detalhe da pré-análise e salva os dados do editor.
-        """
+      
         while self.elemento_por_texto_em_lista_by_tag(driver, "h3", "Digitar Documento") is None:
             print("Espera Página de Digitar Documento")
             time.sleep(0.5)
 
         acessar_elemento_clicavel(driver, '//*[@id="submitButton"]', 'xpath').click()
-        # if existe_elemento(driver, '//*[@id="submitButton"]', 'xpath'):
-        #     continue_button = acessar_elemento(driver, '//*[@id="submitButton"]', 'xpath')
-        #     continue_button.click()
-
+       
         while self.elemento_por_texto_em_lista_by_tag(driver, "h3", "Documento") is None:
             print("Espera Página de Documento")
             time.sleep(0.5)
 
-            acessar_elemento_clicavel(driver, '//*[@id="submitButton"]', 'xpath').click()
-            # if existe_elemento(driver, '//*[@id="submitButton"]', 'xpath'):
-            #     save_button = acessar_elemento(driver, '//*[@id="submitButton"]', 'xpath')
-            #     save_button.click()
-            
+        acessar_elemento_clicavel(driver, '//*[@id="submitButton"]', 'xpath').click()
+
     
     def acessar_tela_arquivo(self, driver):
         while self.elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
             print("Espera Página de Arquivos")
+            time.sleep(0.5)
+            
         acessar_elemento_clicavel(driver, '//*[@id="finishButton"]', 'xpath').click()
 
         while self.elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
             print("Espera Página de Arquivos")
+            time.sleep(0.5)
+            
         acessar_elemento_clicavel(driver, '//input[@id="editButton" and @value="Alterar"]', 'xpath').click()
 
         time.sleep(1)
@@ -515,11 +504,12 @@ class TaskIntimarPessoalmente:
             mensagem = "Não foi possível encontrar checkbox de um documento válido. Realize o procedimento adequado para esse caso."
             logger.info("Não foi possível encontrar checkbox de um documento válido. Aguardando o usuário realizar procedimento adequado.")
             logger.warning(mensagem)
-        while self.elemento_por_texto_em_lista_by_tag(driver, "h3", "Seleção de Documentos") is not None:
-            logger.info("Espera Sair de Seleção de Documentos")
-            time.sleep(0.5)
+        
+        # while self.elemento_por_texto_em_lista_by_tag(driver, "h3", "Seleção de Documentos") is not None:
+        #     logger.info("Espera Sair de Seleção de Documentos")
+        #     time.sleep(0.5)
 
-            return opcao
+        return opcao
         
         
     def selecionar_anexo(self, trs):
@@ -662,10 +652,10 @@ class TaskIntimarPessoalmente:
         user_main_frame =  acessar_elemento_visivel(driver, '//*[@name="userMainFrame"]', 'xpath')
         driver.switch_to.frame(user_main_frame)
         
-        while self.elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
-            print("Espera Página de Arquivos")
-            time.sleep(0.5)
+        # while self.elemento_por_texto_em_lista_by_tag(driver, "h4", "Arquivos") is None:
+        #     print("Espera Página de Arquivos")
+        #     time.sleep(0.5)
 
-        time.sleep(1)
+        # time.sleep(1)
         
         acessar_elemento_clicavel(driver, '//*[@id="postergarButton" and @value="Postergar Assinatura"]', 'xpath').click()
