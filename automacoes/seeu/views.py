@@ -95,11 +95,11 @@ def _intimar_pessoalmente_a_partir_despacho(id_automacao, id_processo):
 
         clicar_botao_selecionar(wait)
 
-        mudar_para_user_main_frame()
+        mudar_para_user_main_frame(driver, wait)
 
         clicar_botao_postergar_assinatura(wait)
 
-        atualizar_porcentagem(automacao, 100, sleep=100, status=models.Automacao.Status.FINALIZADA)
+        atualizar_porcentagem(automacao, 100, sleep=15, status=models.Automacao.Status.FINALIZADA)
         driver.quit()
 
     except Exception as e:
@@ -123,7 +123,7 @@ def clicar_botao_login_corporativo(wait):
     botao.click()
 
 
-def atualizar_porcentagem(automacao, porcentagem, sleep=3, status=None):
+def atualizar_porcentagem(automacao, porcentagem, status=None, sleep=3):
     automacao.porcentagem = porcentagem
     if status:
         automacao.status = status
@@ -140,10 +140,10 @@ def mudar_para_janela_login(driver):
 
 def efetuar_login(wait):
     campo_login = wait.until(EC.visibility_of_element_located([By.ID, 'username']))
-    campo_login.send_keys('80644414200')
+    campo_login.send_keys(settings.USUARIO_SEEU)
 
     campo_senha = wait.until(EC.visibility_of_element_located([By.ID, 'password']))
-    campo_senha.send_keys('MiudoO5656@')
+    campo_senha.send_keys(settings.SENHA_SEEU)
 
     botao_login = wait.until(EC.element_to_be_clickable([By.ID, 'kc-login']))
     botao_login.click()
@@ -225,7 +225,8 @@ def preencher_form_cumprimento(wait):
     prazo.clear()
     prazo.send_keys('15')
 
-    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[type='radio'][value='1']"))).click()
+    css_selector = 'input[type="radio"][name="codTipoClassificacaoMandado"][value="1"]'
+    wait.until(EC.element_to_be_clickable([By.CSS_SELECTOR, css_selector])).click()
 
     select_element = wait.until(EC.presence_of_element_located((By.ID, "codCustasMandado")))
     select = Select(select_element)

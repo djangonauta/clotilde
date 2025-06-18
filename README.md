@@ -10,8 +10,14 @@ Requisitos:
 ### Após clonar o projeto mude para o diretório de instalação e instale suas dependências via Poetry
 
 ```bash
-poetry install --with dev # windows
-poetry install --with dev,unix # linux
+poetry install --with dev
+```
+
+### Adicionar arquivo .env na raiz do projeto com as seguintes variáveis
+
+```bash
+USUARIO_SEEU=altere_para_seu_cpf
+SENHA_SEEU=altere_para_sua_senha
 ```
 
 ## Comandos de execução

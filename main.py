@@ -59,6 +59,9 @@ def abrir_navegador(host='127.0.0.1', porta=8000, atraso=2):
                 chrome_path = location
                 break
 
+        if not chrome_path:
+            raise Exception('Não foi possível encontrar o google chrome no sistema atual.')
+
         if chrome_path:
             import subprocess
             chrome_args = [
@@ -73,7 +76,7 @@ def abrir_navegador(host='127.0.0.1', porta=8000, atraso=2):
             subprocess.Popen(chrome_args)
 
     except Exception as e:
-        print(f'⚠️ Erro ao abrir navegador: {e}')
+        print(f'\n\n⚠️  Erro ao abrir navegador: {e}')
 
 
 def start_django_server():

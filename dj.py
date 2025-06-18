@@ -2,6 +2,7 @@ import os
 import sys
 
 import django
+import environs
 from django import urls
 from django.conf import settings
 from django.conf.urls import static
@@ -9,6 +10,9 @@ from django.core.management.utils import get_random_secret_key
 from django.core.wsgi import get_wsgi_application
 
 import views
+
+env = environs.Env()
+env.read_env()
 
 DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -74,6 +78,8 @@ base_config = dict(
     STATIC_ROOT=STATIC_ROOT,
     ALLOWED_HOSTS=['localhost', '127.0.0.1'],
     SEEU_URL=SEEU_URL,
+    USUARIO_SEEU=env('USUARIO_SEEU'),
+    SENHA_SEEU=env('SENHA_SEEU'),
     PROCESSOS={}
 )
 
