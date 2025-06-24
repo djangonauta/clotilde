@@ -1,5 +1,8 @@
 function configurarAutomacoes() {
   document.querySelectorAll('[automacao]').forEach(function (element) {
+    const SUCESSO = 2;
+    const ERRO = 3;
+
     var id_processo;
     var poolling;
 
@@ -8,48 +11,87 @@ function configurarAutomacoes() {
     const botaoContinuar = element.querySelector('.continuar');
     const botaoCancelar = element.querySelector('.cancelar');
 
-    function iniciarAtivo() {
+    function iniciar() {
       botaoIniciar.disabled = false;
+      botaoPausar.disabled = true;
+      botaoContinuar.disabled = true;
       botaoCancelar.disabled = true;
     }
 
-    function cancelarAtivo() {
+    iniciar();
+
+    function iniciarAtivo() {
       botaoIniciar.disabled = true;
+      botaoPausar.disabled = false;
+      botaoContinuar.disabled = true;
       botaoCancelar.disabled = false;
     }
+
+    function pausarAtivo() {
+      botaoIniciar.disabled = true;
+      botaoPausar.disabled = true;
+      botaoContinuar.disabled = false;
+      botaoCancelar.disabled = false;
+    }
+
+    function continuarAtivo() {
+      botaoIniciar.disabled = true;
+      botaoPausar.disabled = false;
+      botaoContinuar.disabled = true;
+      botaoCancelar.disabled = false;
+    }
+
 
     botaoIniciar.addEventListener('click', async function () {
       if (!confirm('Deseja iniciar essa automação?')) {
         return
       }
-      cancelarAtivo();
+      iniciarAtivo();
 
       const barraProgresso = element.querySelector('.progress-bar');
       barraProgresso.style = `width: 0%`
 
       const url = element.dataset.url;
-      const response = await fetch(url, {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
+      try {
+        const response = await fetch(url, {});
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
         }
-      });
-      const data = await response.json();
-      const id_automacao = data.id_automacao;
-      id_processo = data.id_processo;
-
-      poolling = setInterval(verificar, 200);
-      async function verificar() {
-        const response = await fetch('/automacoes/verificar/' + id_automacao + '/', {
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        });
         const data = await response.json();
-        barraProgresso.style = `width: ${data.porcentagem}%`
-        if (data.porcentagem >= 100 || data.status === 2) {
-          iniciarAtivo();
-          clearInterval(poolling);
+        console.log(data);
+        const id_automacao = data.id_automacao;
+        id_processo = data.id_processo;
+
+        poolling = setInterval(verificar, 200);
+        async function verificar() {
+          try {
+            const response = await fetch('/automacoes/verificar/' + id_automacao + '/', {});
+            if (!response.ok) {
+              throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+            }
+            const data = await response.json();
+            barraProgresso.style = `width: ${data.porcentagem}%`
+            if (data.porcentagem >= 100 || data.status === SUCESSO || data.status === ERRO) {
+              iniciar();
+              clearInterval(poolling);
+              if (data.status === ERRO) {
+                console.log(data);
+                alert('Erro ao executar automação: \n' + data.stack_trace);
+              }
+            }
+          } catch (error) {
+            clearInterval(poolling);
+            iniciar();
+            console.log(error);
+            alert('Erro ao tentar verificar a automação: ' + error.message);
+          }
         }
+
+      } catch (error) {
+        clearInterval(poolling);
+        iniciar();
+        console.log(error);
+        alert('Erro ao tentar iniciar a automação: ' + error.message);
       }
     });
 
@@ -57,10 +99,19 @@ function configurarAutomacoes() {
       if (!confirm('Deseja pausar essa automação?')) {
         return
       }
+      pausarAtivo();
       var url = '/automacoes/pausar/' + id_processo + '/';
-      const response = await fetch(url, {});
-      const data = await response.json()
-      console.log(data);
+      try {
+        const response = await fetch(url, {});
+        const data = await response.json()
+        console.log(data);
+
+      } catch (error) {
+        clearInterval(poolling);
+        iniciar();
+        console.log(error);
+        alert('Erro ao tentar pausar a automação: ' + error.message);
+      }
     });
 
     botaoContinuar.addEventListener('click', async function () {
@@ -68,23 +119,40 @@ function configurarAutomacoes() {
         return
       }
       var url = '/automacoes/continuar/' + id_processo + '/';
-      const response = await fetch(url, {});
-      const data = await response.json()
-      console.log(data);
+      try {
+        const response = await fetch(url, {});
+        const data = await response.json()
+        console.log(data)
+        continuarAtivo();
+
+      } catch (error) {
+        clearInterval(poolling);
+        iniciar();
+        console.log(error);
+        alert('Erro ao tentar continuar a automação: ' + error.message);
+      }
     });
 
     botaoCancelar.addEventListener('click', async function() {
       if (!confirm('Deseja cancelar essa automação?')) {
         return
       }
-      const response = await fetch('/automacoes/cancelar/' + id_processo + '/', {
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
+      try {
+        const response = await fetch('/automacoes/cancelar/' + id_processo + '/', {});
+        if (!response.ok) {
+          throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
         }
-      });
-      const data = await response.json();
-      clearInterval(poolling);
-      iniciarAtivo();
+        const data = await response.json();
+        console.log(data)
+        clearInterval(poolling);
+        iniciar();
+
+      } catch (error) {
+        clearInterval(poolling);
+        iniciar();
+        console.log(error);
+        alert('Erro ao tentar cancelar a automação: ' + error.message);
+      }
     })
   });
 }

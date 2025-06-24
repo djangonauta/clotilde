@@ -4,7 +4,7 @@ import time
 import traceback
 import uuid
 
-from django import http, shortcuts
+from django import http
 from django.conf import settings
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -24,16 +24,12 @@ def intimar_pessoalmente_a_partir_despacho(request):
     processo.start()
 
     settings.PROCESSOS[id_processo] = processo
-
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return http.JsonResponse({
-            'status': 'success',
-            'mensagem': 'Processamento iniciado',
-            'id_automacao': automacao.id,
-            'id_processo': id_processo,
-        })
-
-    return shortcuts.redirect('index')
+    return http.JsonResponse({
+        'status': 'success',
+        'mensagem': 'Processamento iniciado',
+        'id_automacao': automacao.id,
+        'id_processo': id_processo,
+    })
 
 
 def _intimar_pessoalmente_a_partir_despacho(id_automacao, id_processo):
@@ -53,51 +49,67 @@ def _intimar_pessoalmente_a_partir_despacho(id_automacao, id_processo):
             mudar_para_janela_login(driver)
             efetuar_login(wait)
 
-        atualizar_porcentagem(automacao, 10)
+        atualizar_porcentagem(automacao, 5)
 
         mudar_para_janela_original(driver, janela_original, main_frame)
+        atualizar_porcentagem(automacao, 10)
 
         selecionar_vara(wait)
-
-        atualizar_porcentagem(automacao, 20)
+        atualizar_porcentagem(automacao, 15)
 
         mudar_para_user_main_frame(driver, wait)
 
         clicar_tab_outros_cumprimentos(wait)
+        atualizar_porcentagem(automacao, 20)
 
         clicar_link_mandados(wait)
+        atualizar_porcentagem(automacao, 25)
 
         clicar_link_analisar(wait)
+        atualizar_porcentagem(automacao, 30)
 
         selecionar_tipo_arquivo_mandado(wait)
+        atualizar_porcentagem(automacao, 35)
 
         selecionar_modelo_mandado(wait)
+        atualizar_porcentagem(automacao, 40)
 
         clicar_botao_digitar_texto(wait)
+        atualizar_porcentagem(automacao, 45)
 
         clicar_botao_continuar(wait)
+        atualizar_porcentagem(automacao, 50)
 
         clicar_botao_salvar(wait)
+        atualizar_porcentagem(automacao, 55)
 
         clicar_botao_concluir(wait)
+        atualizar_porcentagem(automacao, 60)
 
         clicar_botao_alterar(wait)
+        atualizar_porcentagem(automacao, 65)
 
         preencher_form_cumprimento(wait)
+        atualizar_porcentagem(automacao, 70)
 
         clicar_botao_salvar_form_cumprimento(wait)
+        atualizar_porcentagem(automacao, 75)
 
         clicar_botao_adicionar(wait)
+        atualizar_porcentagem(automacao, 80)
 
         mudar_para_modal_frame(driver, wait)
 
         selecionar_arquivo_decisao(wait)
+        atualizar_porcentagem(automacao, 85)
 
         clicar_botao_selecionar(wait)
+        atualizar_porcentagem(automacao, 90)
 
         mudar_para_user_main_frame(driver, wait)
 
         clicar_botao_postergar_assinatura(wait)
+        atualizar_porcentagem(automacao, 5)
 
         atualizar_porcentagem(automacao, 100, sleep=15, status=models.Automacao.Status.FINALIZADA)
         driver.quit()
@@ -107,8 +119,10 @@ def _intimar_pessoalmente_a_partir_despacho(id_automacao, id_processo):
         automacao.stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
         automacao.save()
 
+        if settings.PROCESSOS.get(id_processo, None):
+            utils.cancelar_processo(settings.PROCESSOS[id_processo])
+
         driver.quit()
-        utils.cancelar_processo(settings.PROCESSOS[id_processo])
         raise e
 
 
