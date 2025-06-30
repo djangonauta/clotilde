@@ -13,7 +13,7 @@ def verificar_automacao(request, id_automacao):
         'status': automacao.status,
         'id_automacao': id_automacao,
         'porcentagem': automacao.porcentagem,
-        'stack_trace': automacao.stack_trace[-200:],
+        'stack_trace': automacao.stack_trace,
     })
 
 

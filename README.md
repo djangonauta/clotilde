@@ -51,5 +51,6 @@ poetry run python ./main.py
 ### Construir o projeto para distribuição na plataforma Windows
 
 ```bash
-poetry run pyinstaller .\app.spec --noconfirm --clean
+poetry run python dj.py collectstatic --noinput --clear
+poetry run pyinstaller app.spec --noconfirm --clean
 ```

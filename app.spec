@@ -60,10 +60,15 @@ excludes = [
 # Pacotes necessários que o PyInstaller pode não detectar automaticamente
 hidden_imports = [
     'automacoes',
-    'automacoes.views',
-    'automacoes.urls',
-    'automacoes.models',
     'automacoes.apps',
+    'automacoes.models',
+    'automacoes.urls',
+    'automacoes.seeu',
+    'automacoes.seeu.apps',
+    'automacoes.seeu.models',
+    'automacoes.seeu.urls',
+    'automacoes.seeu.views',
+    'automacoes.views',
     'forms',
     'views',
     'django.template.defaulttags',
@@ -124,5 +129,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    # icon=os.path.join(base_dir, 'icon.ico'),
+    icon=os.path.join(base_dir, '_internal', 'static', 'img', 'icon.ico'),
 )

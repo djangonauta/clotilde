@@ -22,7 +22,7 @@ if getattr(sys, 'frozen', False):
     DEBUG = False
     BASE_DIR = sys._MEIPASS
     STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
-    SEEU_URL = ''
+    SEEU_URL = SEEU_URL  # deve ser alterada para versão de produção.
 
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, '_internal', 'static')
