@@ -3,14 +3,19 @@ import functools
 import os
 import platform
 import signal
+import sys
 import tkinter as tk
+import traceback
 from tkinter import messagebox
 
 from django import shortcuts
+from django.conf import settings
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+
+from . import models
 
 
 def sessao_possui_credenciais(view_func):
@@ -114,3 +119,12 @@ def cancelar_processo(processo):
         print('Erro ao cancelar o processo', e)
 
     return False
+
+
+def tratar_erro_automacao(automacao, id_processo):
+    automacao.status = models.Automacao.Status.ERRO
+    automacao.stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
+    automacao.save()
+
+    if settings.PROCESSOS.get(id_processo, None):
+        cancelar_processo(settings.PROCESSOS[id_processo])

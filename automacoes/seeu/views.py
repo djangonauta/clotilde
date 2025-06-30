@@ -1,7 +1,5 @@
 import multiprocessing
-import sys
 import time
-import traceback
 import uuid
 
 from django import http
@@ -115,13 +113,7 @@ def _intimar_pessoalmente_a_partir_despacho(id_automacao, id_processo):
         driver.quit()
 
     except Exception as e:
-        automacao.status = models.Automacao.Status.ERRO
-        automacao.stack_trace = ''.join(traceback.format_exception(*sys.exc_info()))
-        automacao.save()
-
-        if settings.PROCESSOS.get(id_processo, None):
-            utils.cancelar_processo(settings.PROCESSOS[id_processo])
-
+        utils.tratar_erro_automacao(automacao, id_processo)
         driver.quit()
         raise e
 
