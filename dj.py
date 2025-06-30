@@ -80,7 +80,7 @@ base_config = dict(
     SEEU_URL=SEEU_URL,
     USUARIO_SEEU=env('USUARIO_SEEU'),
     SENHA_SEEU=env('SENHA_SEEU'),
-    PROCESSOS={}
+    PROCESSOS={},
 )
 
 settings.configure(**base_config)

@@ -1,6 +1,7 @@
 import multiprocessing
 import os
 import sys
+import threading
 import time
 
 import waitress
@@ -71,7 +72,7 @@ def abrir_navegador(host='127.0.0.1', porta=8000, atraso=2):
                 '--window-position=100,100',
                 # '--disable-web-security',
                 '--disable-features=VizDisplayCompositor',
-                url
+                url,
             ]
             subprocess.Popen(chrome_args)
 
@@ -88,7 +89,7 @@ def start_django_server():
 
 def main():
     multiprocessing.freeze_support()
-    t = multiprocessing.Process(target=abrir_navegador)
+    t = threading.Thread(target=abrir_navegador)
     t.daemon = True
     t.start()
 
