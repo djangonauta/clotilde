@@ -63,18 +63,17 @@ def abrir_navegador(host='127.0.0.1', porta=8000, atraso=2):
         if not chrome_path:
             raise Exception('Não foi possível encontrar o google chrome no sistema atual.')
 
-        if chrome_path:
-            import subprocess
-            chrome_args = [
-                chrome_path,
-                '--new-window',
-                '--window-size=1024,768',
-                '--window-position=100,100',
-                # '--disable-web-security',
-                '--disable-features=VizDisplayCompositor',
-                url,
-            ]
-            subprocess.Popen(chrome_args)
+        import subprocess
+        chrome_args = [
+            chrome_path,
+            '--new-window',
+            '--window-size=1024,768',
+            '--window-position=100,100',
+            # '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            url,
+        ]
+        subprocess.Popen(chrome_args)
 
     except Exception as e:
         print(f'\n\n⚠️  Erro ao abrir navegador: {e}')
