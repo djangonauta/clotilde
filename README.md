@@ -27,28 +27,28 @@ Os seguintes comandos são executados no ambiente de desenvolvimento para tarefa
 ### Criar migrations para alterações feitas nos modelos
 
 ```bash
-poetry run python ./dj.py makemigrations
+poetry run python dj.py makemigrations
 ```
 
 ### Aplicar as migrations para o banco de dados local Sqlite
 
 ```bash
-poetry run python ./dj.py migrate
+poetry run python dj.py migrate
 ```
 
 ### Iniciar o servidor de desenvolvimento
 
 ```bash
-poetry run python ./dj.py runserver
+poetry run python dj.py runserver 0.0.0.0:8000
 ```
 
-### Iniciar a aplicação via Pywebview
+### Iniciar a aplicação diretamente via Browser
 
 ```bash
-poetry run python ./main.py
+poetry run python main.py
 ```
 
-### Construir o projeto para distribuição na plataforma Windows
+### Construir o projeto para distribuição na plataforma Windows, ou Linux
 
 ```bash
 poetry run python dj.py collectstatic --noinput --clear
